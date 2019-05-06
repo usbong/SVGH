@@ -116,21 +116,28 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//added by Mike, 20190131
 	private static final int INPUT_NON_MASTER_LIST_OFFSET = 1; 
 	
-	//edited by Mike, 20190424
-	private static final int INPUT_REFERRING_DOCTOR_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;
+	//edited by Mike, 20190507
+	private static final int INPUT_REFERRING_DOCTOR_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET; //15-INPUT_NON_MASTER_LIST_OFFSET;
 	private static final int INPUT_NOTES_COLUMN = 0; //This column is not included in the INPUT_NON_MASTER_LIST_OFFSET
 	private static final int INPUT_DATE_COLUMN = 1-INPUT_NON_MASTER_LIST_OFFSET;
-	private static final int INPUT_NAME_COLUMN = 3-INPUT_NON_MASTER_LIST_OFFSET;
-	private static final int INPUT_CLASS_COLUMN = 8-INPUT_NON_MASTER_LIST_OFFSET; //HMO and NON-HMO
-	private static final int INPUT_NET_PF_COLUMN = 10-INPUT_NON_MASTER_LIST_OFFSET;
-	private static final int INPUT_NEW_OLD_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET;
-	private static final int INPUT_NEW_OLD_PATIENT_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190102
+	private static final int INPUT_NAME_COLUMN = 2-INPUT_NON_MASTER_LIST_OFFSET;//3-INPUT_NON_MASTER_LIST_OFFSET;
+	//The input file determines whether it is a list of HMO transactions or not, i.e. Cash transactions
+	//For HMO transactions, the INPUT_CLASS_COLUMN specifies the name of the HMO. 
+	//Note that no "HMO" keyword is used.
+	//For Cash transactions, the INPUT_CLASS_COLUMN specifies the amount of the SC or PWD discount.
+	private static final int INPUT_CLASS_COLUMN = 19-INPUT_NON_MASTER_LIST_OFFSET;//8-INPUT_NON_MASTER_LIST_OFFSET; //HMO and NON-HMO
 
+	//PT FEE
+	private static final int INPUT_NET_PF_COLUMN = 18-INPUT_NON_MASTER_LIST_OFFSET;//10-INPUT_NON_MASTER_LIST_OFFSET;
+	private static final int INPUT_NEW_OLD_COLUMN = 13-INPUT_NON_MASTER_LIST_OFFSET;//16-INPUT_NON_MASTER_LIST_OFFSET;
+	private static final int INPUT_NEW_OLD_PATIENT_COLUMN = 13-INPUT_NON_MASTER_LIST_OFFSET;//16-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190102; edited by Mike, 20190507
+	
+	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 	private static final int INPUT_CONSULTATION_MEDICAL_DOCTOR_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET;	
 	private static final int INPUT_CONSULTATION_CLASS_COLUMN = 9-INPUT_NON_MASTER_LIST_OFFSET; //HMO and NON-HMO
 	private static final int INPUT_CONSULTATION_NET_PF_COLUMN = 11-INPUT_NON_MASTER_LIST_OFFSET;
 	private static final int INPUT_CONSULTATION_NEW_OLD_COLUMN = 17-INPUT_NON_MASTER_LIST_OFFSET;
-	private static final int INPUT_CONSULTATION_NEW_OLD_PATIENT_COLUMN = 17-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 
+	private static final int INPUT_CONSULTATION_NEW_OLD_PATIENT_COLUMN = 17-INPUT_NON_MASTER_LIST_OFFSET; 
 /*	
 	private static final int INPUT_REFERRING_DOCTOR_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;
 	private static final int INPUT_NOTES_COLUMN = 0; //This column is not included in the INPUT_NON_MASTER_LIST_OFFSET
@@ -142,7 +149,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int INPUT_NEW_OLD_PATIENT_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190102
 */	
 	//TO-DO: -add: column for Consultation transactions, which have both Chief Complaint and Diagnosis
-	private static final int INPUT_DIAGNOSIS_COLUMN = 6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
+	private static final int INPUT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;//6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
 
 	//edited by Mike, 20190425
 	private static final int INPUT_CONSULTATION_PROCEDURE_COLUMN = 2-INPUT_NON_MASTER_LIST_OFFSET;
