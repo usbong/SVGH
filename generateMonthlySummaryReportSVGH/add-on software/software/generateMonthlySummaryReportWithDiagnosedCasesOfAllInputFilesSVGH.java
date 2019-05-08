@@ -82,6 +82,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static String inputOutputTemplateFilenameTreatment = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatment";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
 
+	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 	//added by Mike, 20190422
 	private static String inputOutputTemplateFilenameConsultation = "assets\\templates\\generateMonthlySummaryReportOutputTemplateConsultation";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
@@ -95,6 +96,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//without extension; default input file 
 	private static String inputOutputTemplateFilenameMonthlyStatistics = "assets\\templates\\generateMonthlySummaryReportOutputTemplateMonthlyStatistics";
 	private static String inputDataFilenameTreatmentMonthlyStatistics = "assets\\transactions\\treatmentCountList";
+
+	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.	
 	private static String inputDataFilenameConsultationMonthlyStatistics = "assets\\transactions\\consultationCountList";
 	private static String inputDataFilenameProcedureMonthlyStatistics = "assets\\transactions\\procedureCountList";
 	
@@ -185,6 +188,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static ArrayList<String[]> knownDiagnosedCasesContainerArrayList; //edited by Mike, 20190430
 	private static HashMap<String, Integer> classifiedDiagnosedCasesContainer; //added by Mike, 20190412
 	private static HashMap<Integer, Integer[]> treatmentMonthlyStatisticsContainer; //added by Mike, 20190503
+
+	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 	private static HashMap<Integer, Integer[]> consultationMonthlyStatisticsContainer; //added by Mike, 20190504
 	private static HashMap<Integer, Integer[]> procedureMonthlyStatisticsContainer; //added by Mike, 20190504
 
@@ -233,6 +238,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int OUTPUT_CONSULTATION_NON_HMO_FOLLOW_UP_COUNT_COLUMN = 24; //added by Mike, 20190202
 
 	private static boolean isConsultation;
+	private static boolean isHMO; //added by Mike, 20190507
 	
 	private static DecimalFormat df = new DecimalFormat("0.00"); //added by Mike, 20181105
 	private static int rowCount; //added by Mike, 20181105
@@ -323,18 +329,21 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	{			
 		makeFilePath("output"); //"output" is the folder where I've instructed the add-on software/application to store the output file			
 		PrintWriter treatmentWriter = new PrintWriter("output/MonthlySummaryReportOutputTreatment.html", "UTF-8");			
+/*		
 		PrintWriter consultationWriter = new PrintWriter("output/MonthlySummaryReportOutputConsultation.html", "UTF-8");	
-		
+*/		
 		//added by Mike, 20190426
 		PrintWriter treatmentUnclassifiedDiagnosedCasesWriter = new PrintWriter("output/MonthlySummaryReportOfUnclassifiedDiagnosedCasesOutput.html", "UTF-8");	
 		
 		//added by Mike, 20190503
 		PrintWriter treatmentCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsTreatment.html", "UTF-8");	
+
 		//added by Mike, 20190503
-		PrintWriter consultationCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsConsultation.html", "UTF-8");	
+/*		PrintWriter consultationCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsConsultation.html", "UTF-8");	
+
 		//added by Mike, 20190503
 		PrintWriter procedureCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsProcedure.html", "UTF-8");	
-		
+*/		
 
 /*		
 		//added by Mike, 20190413
@@ -355,6 +364,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		knownDiagnosedCasesContainerArrayList = new ArrayList<String[]>(); //edited by Mike, 20190430
 		classifiedDiagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
 		treatmentMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190503
+
+		//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 		consultationMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190504
 		procedureMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190504
 		
@@ -383,9 +394,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	
 		//added by Mike, 20190503; edited by Mike, 20190504
 		processMonthlyStatisticsData(TREATMENT_FILE_TYPE);
+/*		
 		processMonthlyStatisticsData(CONSULTATION_FILE_TYPE);
 		processMonthlyStatisticsData(PROCEDURE_FILE_TYPE);
-
+*/
 	
 /*		
 		//TODO: -apply: this properly in the add-on software to consolidate similar Strings, e.g. Medical Doctor, whose difference may only be an excess space between characters, etc
@@ -419,6 +431,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		//edited by Mike, 20190131
 		/*writer.print("Monthly Summary Report\n");
 		*/
+/*		
 		//edited by Mike, 20190427
 		if (!isConsultationInputFileEmpty) {
 			processWriteOutputFileConsultation(consultationWriter);
@@ -426,7 +439,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		else {
 			System.out.println("\nThere is no Tab-delimited .txt input file in the \"input\\consultation\" folder.\n");
 		}
-		
+*/		
 		if (!isTreatmentInputFileEmpty) {
 			processWriteOutputFileTreatment(treatmentWriter);
 			//added by Mike, 20190426
@@ -434,68 +447,14 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			
 			//added by Mike, 20190503; edited by Mike, 20190504
 			processWriteOutputFileMonthlyStatistics(treatmentCountMonthlyStatisticsWriter, TREATMENT_FILE_TYPE);		
+/*			
 			processWriteOutputFileMonthlyStatistics(consultationCountMonthlyStatisticsWriter, CONSULTATION_FILE_TYPE);		
 			processWriteOutputFileMonthlyStatistics(procedureCountMonthlyStatisticsWriter, PROCEDURE_FILE_TYPE);		
-
+*/
 		}
 		else {
 			System.out.println("\nThere is no Tab-delimited .txt input file in the \"input\\treatment\" folder.\n");
 		}
-						
-		/*writer.close();
-		*/
-		//--------------------------------------------------------------------------------------
-		// OUTPUT FOR DIAGNOSED CASES
-		//--------------------------------------------------------------------------------------
-/*		
-		//edited by Mike, 20190223
-		SortedSet<String> sortedDiagnosedCasesKeyset = new TreeSet<String>(diagnosedCasesContainer.keySet());
-		SortedSet<String> sortedDiagnosedCasesClassifiedKeyset = new TreeSet<String>(classifiedDiagnosedCasesContainer.keySet());
-	
-		int total = 0;
-		
-		diagnosedCasesWriter.print("Monthly Summary Report of Diagnosed Cases\n");
-
-		for (String key : sortedDiagnosedCasesKeyset) {	
-			int diagnosedCaseCount = diagnosedCasesContainer.get(key);
-			total+=diagnosedCaseCount;
-			
-			diagnosedCasesWriter.println(
-							key + "\t" + 
-							diagnosedCaseCount+"\n"							
-						); 				   							
-		}
-		
-		diagnosedCasesWriter.println(
-							"TOTAL:\t" + 
-							total+"\n"							
-						); 				   							
-
-		//added by Mike, 20190223
-		diagnosedCasesClassifiedWriter.print("Monthly Summary Report of Classified Diagnosed Cases\n");
-				
-		total = 0;
-		
-		for (String key : sortedDiagnosedCasesClassifiedKeyset) {	
-			int diagnosedCaseCount = classifiedDiagnosedCasesContainer.get(key);
-			total+=diagnosedCaseCount;
-			
-			diagnosedCasesClassifiedWriter.println(
-							key + "\t" + 
-							diagnosedCaseCount+"\n"							
-						); 				   							
-		}
-		
-		diagnosedCasesClassifiedWriter.println(
-							"TOTAL:\t" + 
-							total+"\n"							
-						); 				   		
-						
-						
-		
-		diagnosedCasesWriter.close();
-		diagnosedCasesClassifiedWriter.close();
-*/		
 	}
 	
 	private static String convertDateToMonthYearInWords(int date) {
@@ -538,8 +497,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		return sb.substring(0,3).concat("-").concat(sb.substring(sb.length()-2,sb.length()));
 	}
 
-	//input: Jan
-	//output: 1
+	//edited by Mike, 20190508
+	//input: jan
+	//output: 01
 	private static String convertMonthToNumber(String month) {
 		switch(month) {
 			case "jan":
@@ -649,7 +609,12 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			if (dateValuesArrayInt[i]==0) { //if there is no .txt input file
 				return false;
 			}
-*/					
+*/			
+			System.out.println("dateValueInt: "+i);
+			System.out.println("dateValuesArrayInt[i]: "+dateValuesArrayInt[i]);
+			System.out.println("dateContainer.get(dateValuesArrayInt[i]): "+dateContainer.get(dateValuesArrayInt[i]));
+
+			
 			treatmentCount = dateContainer.get(dateValuesArrayInt[i])[OUTPUT_HMO_COUNT_COLUMN] + dateContainer.get(dateValuesArrayInt[i])[OUTPUT_NON_HMO_COUNT_COLUMN];
 
 			//added by Mike, 20181218; edited by Mike, 20190427
@@ -753,17 +718,20 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		return true; //added by Mike, 20190426
 	}
 	
-	private static void processMonthlyCount(HashMap<Integer, double[]> dateContainer, String[] inputColumns, int i, boolean isConsultation) {
+//	private static void processMonthlyCount(HashMap<Integer, double[]> dateContainer, String[] inputColumns, int i, boolean isConsultation) {
+	private static void processMonthlyCount(HashMap<Integer, double[]> dateContainer, String[] inputColumns, int i, boolean isConsultation, boolean isHMO) {	
+	
 		//				if (!referringDoctorContainer.containsKey(inputColumns[INPUT_REFERRING_DOCTOR_COLUMN])) {
 				if (!dateContainer.containsKey(dateValuesArrayInt[i])) {
 					columnValuesArray = new double[OUTPUT_TOTAL_COLUMNS];
 
-					//edited by Mike, 20181218
+					//edited by Mike, 20190507
 					if (!isConsultation) {											
-						//edited by Mike, 20181206
-						if ((inputColumns[INPUT_CLASS_COLUMN].contains("HMO")) ||
+						//edited by Mike, 20180507
+/*						if ((inputColumns[INPUT_CLASS_COLUMN].contains("HMO")) ||
 							(inputColumns[INPUT_CLASS_COLUMN].contains("SLR"))) {
-
+*/
+						if (isHMO) {
 							columnValuesArray[OUTPUT_HMO_COUNT_COLUMN] = 1;
 /*							
 							columnValuesArray[OUTPUT_HMO_TOTAL_NET_TREATMENT_FEE_COLUMN] = Double.parseDouble(inputColumns[INPUT_NET_PF_COLUMN]);
@@ -793,6 +761,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 */							
 						}
 					}
+/*					
 					else {												
 						if ((inputColumns[INPUT_CONSULTATION_CLASS_COLUMN].contains("HMO")) ||
 							(inputColumns[INPUT_CONSULTATION_CLASS_COLUMN].contains("SLR"))) {
@@ -813,13 +782,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 							}	
 							else {
 								columnValuesArray[OUTPUT_CONSULTATION_HMO_COUNT_COLUMN] = 1;
-							}
-/*
-							//added by Mike, 20190105
-							if (inputColumns[INPUT_CONSULTATION_PROCEDURE_COLUMN].toLowerCase().contains("p")) {
-								columnValuesArray[OUTPUT_CONSULTATION_HMO_PROCEDURE_COUNT_COLUMN] = 1;
-							}
-*/							
+							}					
 						}
 						else {
 							//edited by Mike, 20190107
@@ -838,18 +801,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 							}	
 							else {
 								columnValuesArray[OUTPUT_CONSULTATION_NON_HMO_COUNT_COLUMN] = 1;
-							}
-
-/*							columnValuesArray[OUTPUT_CONSULTATION_NON_HMO_COUNT_COLUMN] = 1;
-*/
-/*
-							//added by Mike, 20190105
-							if (inputColumns[INPUT_CONSULTATION_PROCEDURE_COLUMN].toLowerCase().contains("p")) {
-								columnValuesArray[OUTPUT_CONSULTATION_NON_HMO_PROCEDURE_COUNT_COLUMN] = 1;
-							}
-*/							
-						}						
+							}					
+						}	
 					}
+*/						
 					
 //					referringDoctorContainer.put(inputColumns[INPUT_REFERRING_DOCTOR_COLUMN], columnValuesArray);
 					dateContainer.put(dateValuesArrayInt[i], columnValuesArray);
@@ -857,9 +812,11 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				else {
 					//edited by Mike, 20181218
 					if (!isConsultation) {											
-						//edited by Mike, 20181206
-						if ((inputColumns[INPUT_CLASS_COLUMN].contains("HMO")) ||
-							(inputColumns[INPUT_CLASS_COLUMN].contains("SLR"))) {								
+						//edited by Mike, 20190507
+/*						if ((inputColumns[INPUT_CLASS_COLUMN].contains("HMO")) ||
+							(inputColumns[INPUT_CLASS_COLUMN].contains("SLR"))) {
+*/
+						if (isHMO) {							
 							dateContainer.get(dateValuesArrayInt[i])[OUTPUT_HMO_COUNT_COLUMN]++;					
 /*							dateContainer.get(dateValuesArrayInt[i])[OUTPUT_HMO_TOTAL_NET_TREATMENT_FEE_COLUMN] 
 								+= Double.parseDouble(inputColumns[INPUT_NET_PF_COLUMN]);
@@ -885,12 +842,11 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 							}
 */							
 						}
-					}
+					}/*
 					else {
 						if ((inputColumns[INPUT_CONSULTATION_CLASS_COLUMN].contains("HMO")) ||
 							(inputColumns[INPUT_CONSULTATION_CLASS_COLUMN].contains("SLR"))) {
-/*							dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_HMO_COUNT_COLUMN]++;					
-*/							
+							
 							//edited by Mike, 20190107
 							if (inputColumns[INPUT_CONSULTATION_MEDICAL_CERTIFICATE_COLUMN].toLowerCase().trim().contains("mc")) {
 								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_HMO_MEDICAL_CERTIFICATE_COUNT_COLUMN]++;
@@ -907,17 +863,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 							}	
 							else {
 								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_HMO_COUNT_COLUMN]++;								
-							}
-/*
-							//added by Mike, 20190105
-							if (inputColumns[INPUT_CONSULTATION_PROCEDURE_COLUMN].toLowerCase().contains("p")) {
-								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_HMO_PROCEDURE_COUNT_COLUMN]++;
-							}
-*/							
+							}							
 						}
 						else {							
-/*							dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_NON_HMO_COUNT_COLUMN]++;					
-*/
 							//edited by Mike, 20190107
 							if (inputColumns[INPUT_CONSULTATION_MEDICAL_CERTIFICATE_COLUMN].toLowerCase().trim().contains("mc")) {
 								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_NON_HMO_MEDICAL_CERTIFICATE_COUNT_COLUMN]++;
@@ -935,15 +883,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 							else {
 								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_NON_HMO_COUNT_COLUMN]++;								
 							}
-/*
-							//added by Mike, 20190105
-							if (inputColumns[INPUT_CONSULTATION_PROCEDURE_COLUMN].toLowerCase().contains("p")) {
-								dateContainer.get(dateValuesArrayInt[i])[OUTPUT_CONSULTATION_NON_HMO_PROCEDURE_COUNT_COLUMN]++;
-							}
-*/							
 						}
 					}
-				}					
+*/					
+				}	
 	}
 
 	//added by Mike, 20181217
@@ -1967,6 +1910,11 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 	}
 
 	private static void processInputFiles(String[] args, boolean isPhaseOne) throws Exception {
+		
+		System.out.println("isPhaseOne: "+isPhaseOne);
+		System.out.println("args.length: "+args.length);
+		
+		
 		//edited by Mike, 20181030
 		for (int i=0; i<args.length; i++) {						
 			//added by Mike, 20181030
@@ -1991,7 +1939,16 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			else {
 				isConsultation=false;
 			}
-						
+
+			//added by Mike, 20190507
+			if (inputFilename.toLowerCase().contains("hmo")) {
+				System.out.println(">>> contains HMO");
+				isHMO=true;
+			}
+			else {
+				isHMO=false;
+			}
+			
 			Scanner sc = new Scanner(new FileInputStream(f));				
 		
 			String s;		
@@ -2003,9 +1960,9 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			if (isInDebugMode) {
 				rowCount=0;
 			}
-						
+
 			//count/compute the number-based values of inputColumns 
-			while (sc.hasNextLine()) {
+			while (sc.hasNextLine()) {				
 				s=sc.nextLine();
 				
 				//if the row is blank
@@ -2017,11 +1974,16 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 				
 				//added by Mike, 20180412
 				if (dateValuesArray[i]==null) {
+/*					System.out.println("getMonthYear(inputColumns[INPUT_DATE_COLUMN]): "+getMonthYear(inputColumns[INPUT_DATE_COLUMN]));
+*/
 					dateValuesArray[i] = getMonthYear(inputColumns[INPUT_DATE_COLUMN]);
 				}
 				
 				//edited by Mike, 20190207
 				if (dateValuesArrayInt[i]==0) {
+/*					
+					System.out.println("getYearMonthAsInt(inputColumns[INPUT_DATE_COLUMN]): "+getYearMonthAsInt(inputColumns[INPUT_DATE_COLUMN]));
+*/
 					dateValuesArrayInt[i] = getYearMonthAsInt(inputColumns[INPUT_DATE_COLUMN]);					
 /*					
 					dateValuesArrayInt[i] = Integer.parseInt(args[i].substring(args[i].indexOf("_")+1,args[i].indexOf(".txt")));
@@ -2084,13 +2046,20 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 				if (isPhaseOne) {
 					//added by Mike, 20181216
 	//				processMonthlyCount(dateContainer, inputColumns, i, false);
-					processMonthlyCount(dateContainer, inputColumns, i, isConsultation); //isConsultation = false
-					
+//					processMonthlyCount(dateContainer, inputColumns, i, isConsultation); //isConsultation = false					
+
+					System.out.println("isHMO: "+isHMO);
+
+					//edited by Mike, 20190507
+					processMonthlyCount(dateContainer, inputColumns, i, false, isHMO); //isConsultation = false
+/*
 					//added by Mike, 20181217
 					processHMOCount(hmoContainer, inputColumns, isConsultation); //edited by Mike, 20181219
 					
 					//added by Mike, 20181217
 					processNonHMOCount(nonHmoContainer, inputColumns, isConsultation); //edited by Mike, 20181219
+*/
+					
 /*					
 					//added by Mike, 20181218
 					processReferringDoctorTransactionCount(referringDoctorContainer, inputColumns, isConsultation); //edited by Mike, 20181219
@@ -2100,19 +2069,25 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 	
 					//edited by Mike, 20190426
 					if (isConsultation) {
+/*						//Note that at present Consultation transactions are not processed at SVGH.
 						//added by Mike, 20190202
 						processMedicalDoctorTransactionCount(medicalDoctorContainer, inputColumns, isConsultation);						
+*/						
 					}
 					else {
+/*						//TO-DO: -update: this
 						processMedicalDoctorTransactionCount(referringDoctorContainer, inputColumns, isConsultation);						
+*/						
 
 						//added by Mike, 20190413
 						processDiagnosedCasesCount(diagnosedCasesContainer, inputColumns, isConsultation); 
 					}
 				}
 				else {
+/*					//TO-DO: -update: this
 					//added by Mike, 20181220
 					processMedicalDoctorTransactionPerClassificationCount(classificationContainerPerMedicalDoctor, inputColumns, isConsultation);					
+*/					
 				}
 			}		
 /*			//added by Mike, 20181205
