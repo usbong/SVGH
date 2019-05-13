@@ -78,8 +78,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//added by Mike, 20190413
 	private static String diagnosedCasesListInputFilename = "diagnosedCasesList"; //without extension; default input file 
 
-	//added by Mike, 20190414
-	private static String inputOutputTemplateFilenameTreatment = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatment";//without extension; default input file 
+	//added by Mike, 20190414; edited by Mike, 20190513
+	private static String inputOutputTemplateFilenameTreatment = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatmentSVGH";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
 
 	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
@@ -87,8 +87,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static String inputOutputTemplateFilenameConsultation = "assets\\templates\\generateMonthlySummaryReportOutputTemplateConsultation";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
 
-	//added by Mike, 20190426	
-	private static String inputOutputTemplateFilenameTreatmentUnclassifiedDiagnosedCases = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatmentUnclassifiedDiagnosedCases";//without extension; default input file 
+	//added by Mike, 20190426; edited by Mike, 20190513
+	private static String inputOutputTemplateFilenameTreatmentUnclassifiedDiagnosedCases = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatmentUnclassifiedDiagnosedCasesSVGH";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
 
 	//added by Mike, 20190503; edited by Mike, 20190504
@@ -610,10 +610,11 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				return false;
 			}
 */			
+/*
 			System.out.println("dateValueInt: "+i);
 			System.out.println("dateValuesArrayInt[i]: "+dateValuesArrayInt[i]);
 			System.out.println("dateContainer.get(dateValuesArrayInt[i]): "+dateContainer.get(dateValuesArrayInt[i]));
-
+*/
 			
 			treatmentCount = dateContainer.get(dateValuesArrayInt[i])[OUTPUT_HMO_COUNT_COLUMN] + dateContainer.get(dateValuesArrayInt[i])[OUTPUT_NON_HMO_COUNT_COLUMN];
 
@@ -1942,7 +1943,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 
 			//added by Mike, 20190507
 			if (inputFilename.toLowerCase().contains("hmo")) {
-				System.out.println(">>> contains HMO");
+//				System.out.println(">>> contains HMO");
 				isHMO=true;
 			}
 			else {
@@ -2048,7 +2049,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 	//				processMonthlyCount(dateContainer, inputColumns, i, false);
 //					processMonthlyCount(dateContainer, inputColumns, i, isConsultation); //isConsultation = false					
 
-					System.out.println("isHMO: "+isHMO);
+//					System.out.println("isHMO: "+isHMO);
 
 					//edited by Mike, 20190507
 					processMonthlyCount(dateContainer, inputColumns, i, false, isHMO); //isConsultation = false
