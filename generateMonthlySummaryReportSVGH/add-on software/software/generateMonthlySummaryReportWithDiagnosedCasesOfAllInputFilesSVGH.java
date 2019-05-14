@@ -285,6 +285,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	
 	//added by Mike, 20190426
 	private static int totalDiagnosedCaseCount = 0;
+	private static int totalDiagnosedCaseHMOCount = 0; //added by Mike, 20190514
 	
 	//added by Mike, 20190416
 	private static final String classificationWI = "WI";
@@ -2138,15 +2139,23 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 		SortedSet<String> sortedKeyset = new TreeSet<String>(diagnosedCasesContainer.keySet());
 //		SortedSet<String> sortedClassifiedKeyset = new TreeSet<String>(classifiedDiagnosedCasesContainer.keySet());
 
+		SortedSet<String> sortedHMOKeyset = new TreeSet<String>(diagnosedCasesHMOContainer.keySet()); //added by Mike, 20190514
+
+		//added by Mike, 20190514
+		SortedSet<String> sortedDiagnosedCasesHMOClassificationKeyset = new TreeSet<String>(diagnosedCasesHMOClassificationContainer.keySet());	
+		Set<Entry<String, Integer>> diagnosedCasesHMOClassificationContainerSet = diagnosedCasesHMOClassificationContainer.entrySet();
+        List<Entry<String, Integer>> sortedDiagnosedCasesHMOClassificationContainerList = new ArrayList<Entry<String, Integer>>(diagnosedCasesHMOClassificationContainerSet);
+
+
 		//count/compute the number-based values of inputColumns 
 		while (sc.hasNextLine()) {
 			s=sc.nextLine();
-/*			
-			//if the row is blank
-			if (s.trim().equals("")) {
-				continue;
-			}
-*/			
+
+//			//if the row is blank
+//			if (s.trim().equals("")) {
+//				continue;
+//			}
+
 			if (isInDebugMode) {
 				rowCount++;
 //				System.out.println("rowCount: "+rowCount);
@@ -2154,7 +2163,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			
 			s = s.replace("<?php echo $data['date'];?>", "" + dateValue.toUpperCase());
 			
-			if (s.contains("<!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS -->")) {
+			if (s.contains("<!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH CASH PAYMENT -->")) {
 				//added by Mike, 20190426
 				int diagnosedCaseCount = 0;
 				
@@ -2177,12 +2186,64 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			}		
 				
 			//added by Mike, 20190426
-			s = s.replace("<?php echo $data['total_new_cases_count'];?>", "" + (int) totalDiagnosedCaseCount);				
+			s = s.replace("<?php echo $data['total_new_cases_count'];?>", "" + (int) totalDiagnosedCaseCount + "/" + totalNewPatientTreatmentCashTransactionsCount);
+			
+			if (s.contains("<!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH HMO CARD PAYMENT -->")) {
+				//added by Mike, 20190426
+				int diagnosedCaseHMOCount = 0;
+				
+				for (String key : sortedHMOKeyset) {	
+					diagnosedCaseHMOCount = diagnosedCasesHMOContainer.get(key);
+					totalDiagnosedCaseHMOCount+=diagnosedCaseHMOCount;			
+
+					s = s.concat("\n");
+					s = s.concat("\t\t\t\t\t  <tr>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 1 -->\n");
+					s = s.concat("\t\t\t\t\t     <td>\n");
+					s = s.concat("\t\t\t\t\t		  <b><span>" + key + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t	  </td>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 2 -->\n");
+					s = s.concat("\t\t\t\t\t	  <td>\n");
+					s = s.concat("\t\t\t\t\t	  <b><span>" + diagnosedCaseHMOCount + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t     </td>\n");
+					s = s.concat("\t\t\t\t\t  </tr>");					
+				}
+			}		
+				
+			//added by Mike, 20190426
+			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalDiagnosedCaseHMOCount + "/" + totalNewPatientTreatmentHMOTransactionsCount);
+
+			
+			//added by Mike, 20190514
+			if (s.contains("<!-- Table Values: HMO CARD NAME -->")) {
+				totalTreatmentNewHMOCasesCount = 0;
+			
+				for (String key : sortedDiagnosedCasesHMOClassificationKeyset) {	
+					s = s.concat("\n");
+					s = s.concat("\t\t\t\t\t  <tr>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 1 -->\n");
+					s = s.concat("\t\t\t\t\t     <td>\n");
+					s = s.concat("\t\t\t\t\t		  <b><span>" + key + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t	  </td>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 2 -->\n");
+					s = s.concat("\t\t\t\t\t	  <td>\n");
+					s = s.concat("\t\t\t\t\t	  <b><span>" + diagnosedCasesHMOClassificationContainer.get(key) + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t     </td>\n");
+					s = s.concat("\t\t\t\t\t  </tr>");
+					
+					//added by Mike, 20190426
+					totalTreatmentNewHMOCasesCount += diagnosedCasesHMOClassificationContainer.get(key);
+				}			
+			}
+
+			s = s.replace("<?php echo $data['total_new_cases_hmo_transactions_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount);
+			
 			writer.print(s + "\n");		
 		}
 		
 		writer.close();
 	}
+
 						
 	//added by Mike, 20190503; edited by Mike, 20190504
 	private static void processWriteOutputFileMonthlyStatistics(PrintWriter writer, int fileType) throws Exception {		
@@ -2367,7 +2428,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
         List<Entry<String, Integer>> sortedClassifiedDiagnosedCasesHMOContainerList = new ArrayList<Entry<String, Integer>>(classifiedDiagnosedCasesHMOContainerSet);
 		
 		//added by Mike, 20190514
-		SortedSet<String> sortedClassifiedHMOClassificationKeyset = new TreeSet<String>(diagnosedCasesHMOClassificationContainer.keySet());	
+		SortedSet<String> sortedDiagnosedCasesHMOClassificationKeyset = new TreeSet<String>(diagnosedCasesHMOClassificationContainer.keySet());	
 		Set<Entry<String, Integer>> diagnosedCasesHMOClassificationContainerSet = diagnosedCasesHMOClassificationContainer.entrySet();
         List<Entry<String, Integer>> sortedDiagnosedCasesHMOClassificationContainerList = new ArrayList<Entry<String, Integer>>(diagnosedCasesHMOClassificationContainerSet);
 		
@@ -2500,7 +2561,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			if (s.contains("<!-- Table Values: HMO CARD NAME -->")) {
 				totalTreatmentNewHMOCasesCount = 0;
 			
-				for (String key : sortedClassifiedHMOClassificationKeyset) {	
+				for (String key : sortedDiagnosedCasesHMOClassificationKeyset) {	
 					s = s.concat("\n");
 					s = s.concat("\t\t\t\t\t  <tr>\n");
 					s = s.concat("\t\t\t\t\t	  <!-- Column 1 -->\n");
@@ -2547,7 +2608,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 		
 		writer.close();
 	}
-
+	
 	//added by Mike, 20190422
 	private static void processWriteOutputFileConsultation(PrintWriter writer) throws Exception {
 		File f = new File(inputOutputTemplateFilenameConsultation+".html");

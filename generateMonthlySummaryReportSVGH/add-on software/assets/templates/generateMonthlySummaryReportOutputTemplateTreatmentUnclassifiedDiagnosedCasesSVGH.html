@@ -8,7 +8,7 @@
 ' Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, ' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing ' permissions and limitations under the License.
 '
 ' @author: Michael Syson
-' @date created: 20190426
+' @date created: 20190413
 ' @date updated: 20190513
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -72,7 +72,7 @@
 			  <!-- Note that the date value must be in Month and Year, e.g. MARCH 2019 -->
 			  <b><span>UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS FOR <?php echo $data['date'];?></span></b>
 			</td>
-		  </tr>		 
+		  </tr>
 		</table>
 	</div>
 	<br />
@@ -83,15 +83,14 @@
 		  <!-- Table Row -->
 		  <tr>
 		    <!-- Column 1 -->
-			<td>
-				<!-- TABLE 1: NEW CASES -->
+			<td>				
+				<!-- TABLE 1: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH CASH PAYMENT -->
 				<div>
 					<table width="100%">
 					  <tr>
 						<td>
 						  <!-- Note that the date value must be in Month and Year, e.g. MARCH 2019 -->
 						  <b><span>NEW CASES <br />
-						           <?php echo $data['date'];?>
 						     </span>
 						  </b>
 						</td>
@@ -109,12 +108,12 @@
 						  <b><span>NUMBER:</span></b>
 						</td>
 					  </tr>
-					  <!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS -->					  
-					  <!-- Table Values: TOTAL COUNT OF NEW CASES -->
+					  <!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH CASH PAYMENT -->
+					  <!-- Table Values: TOTAL COUNT OF UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH CASH PAYMENT -->
 					  <tr>
 						<!-- Column 1 -->
 						<td>
-						  <b><span>TOTAL COUNT OF UNCLASSIFIED CASES OF NEW PATIENTS:</span></b>
+						  <b><span>TOTAL COUNT OF NEW CASES:</span></b>
 						</td>
 						<!-- Column 2 -->
 						<td>
@@ -123,7 +122,89 @@
 					  </tr>
 					</table>		
 				</div>	
-			</td>		    
+			</td>
+		    <!-- Column 2 -->
+			<td>
+				<!-- TABLE 2: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH HMO CARD PAYMENT -->
+				<div>
+					<table width="100%">
+					  <tr>
+						<td>
+						  <!-- Note that the date value must be in Month and Year, e.g. MARCH 2019 -->
+						  <b><span>HMO NEW CASES <br />
+						     </span>
+						  </b>
+						</td>
+					  </tr>
+					</table>
+					<table width="70%" class="pt_census">
+  					  <!-- Table Header -->
+					  <tr>
+						<!-- Column 1 -->
+						<td>
+						  <b><span>CASE/DIAGNOSIS:</span></b>
+						</td>
+						<!-- Column 2 -->
+						<td>
+						  <b><span>NUMBER:</span></b>
+						</td>
+					  </tr>
+					  <!-- Table Values: UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH HMO CARD PAYMENT -->
+					  <!-- Table Values: TOTAL COUNT OF UNCLASSIFIED DIAGNOSED CASES OF NEW PATIENTS WITH HMO CARD PAYMENT -->
+					  <tr>
+						<!-- Column 1 -->
+						<td>
+						  <b><span>TOTAL COUNT OF NEW HMO CASES:</span></b>
+						</td>
+						<!-- Column 2 -->
+						<td>
+						  <b><span><?php echo $data['total_new_hmo_cases_count'];?></span></b>
+						</td>
+					  </tr>
+					</table>		
+				</div>	
+			</td>
+			<!-- Column 3 -->
+			<td>
+				<!-- TABLE 3: HMO (HEALTH MAINTENANCE ORGANIZATION) CARDS -->
+				<div>
+					<table width="100%">
+					  <tr>
+						<td>
+						  <b><span>HEALTH CARD <br />
+							</span>
+						  </b>
+						</td>
+					  </tr>
+					</table>
+					<table width="70%" class="pt_census">
+  					  <!-- Table Header -->
+					  <tr>
+						<!-- Column 1 -->
+						<td>
+						  <b><span>HEALTH CARD NAME:</span></b>
+						</td>
+						<!-- Column 2 -->
+						<td>
+						  <b><span>NUMBER:</span></b>
+						</td>
+					  </tr>
+					  <!-- Table Values: HMO CARD NAME -->					  					  
+					  <!-- Table Values: TOTAL COUNT OF HMO CARD TRANSACTIONS  -->
+					  <tr>
+						<!-- Column 1 -->
+						<td>
+						  <b><span>TOTAL COUNT:</span></b>
+						</td>
+						<!-- Column 2 -->
+						<td>
+						  <b><span><?php echo $data['total_new_cases_hmo_transactions_count'];?></span></b>
+						</td>
+					  </tr>
+					</table>		
+				</div>	
+			</td>
+		  </tr>		  
 		</table>		
 	</div>	
 	<br />
