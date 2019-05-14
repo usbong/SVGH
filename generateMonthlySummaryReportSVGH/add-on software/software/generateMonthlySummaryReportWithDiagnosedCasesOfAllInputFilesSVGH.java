@@ -279,6 +279,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static int totalOldPatientPerDoctorCount = 0;
 	private static int totalTreatmentNewCasesCount = 0; //added by Mike, 20190426
 	private static int totalTreatmentNewHMOCasesCount = 0; //added by Mike, 20190514
+	private static int totalTreatmentNewCashCasesCount = 0; //added by Mike, 20190514
+	private static int totalNewPatientTreatmentHMOTransactionsCount = 0; //added by Mike, 20190514
+	private static int totalNewPatientTreatmentCashTransactionsCount = 0; //added by Mike, 20190514
 	
 	//added by Mike, 20190426
 	private static int totalDiagnosedCaseCount = 0;
@@ -2096,11 +2099,12 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						}
 						else { //for HMO transactions
 							//added by Mike, 20190413
-							processDiagnosedCasesCount(diagnosedCasesHMOContainer, inputColumns, isConsultation); 
-							
-							//added by Mike, 20190514
-							processDiagnosedCasesHMOClassificationCount(diagnosedCasesHMOClassificationContainer, inputColumns, isConsultation); 
+							processDiagnosedCasesCount(diagnosedCasesHMOContainer, inputColumns, isConsultation); 							
 						}
+						
+						//added by Mike, 20190514
+						processDiagnosedCasesClassificationCount(isHMO, inputColumns, isConsultation); 
+
 					}
 				}
 				else {
@@ -2465,8 +2469,8 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 				}			
 			}
 			
-			//added by Mike, 20190426
-			s = s.replace("<?php echo $data['total_new_cases_count'];?>", "" + (int) totalTreatmentNewCasesCount);
+			//added by Mike, 20190426; edited by Mike, 20190514
+			s = s.replace("<?php echo $data['total_new_cases_count'];?>", "" + (int) totalTreatmentNewCasesCount + "/" + totalNewPatientTreatmentCashTransactionsCount);
 
 			//added by Mike, 20190514
 			if (s.contains("<!-- Table Values: NEW HMO CASES -->")) {
@@ -2490,7 +2494,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 				}			
 			}
 
-			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount);
+			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount + "/" + totalNewPatientTreatmentHMOTransactionsCount);
 			
 			//added by Mike, 20190514
 			if (s.contains("<!-- Table Values: HMO CARD NAME -->")) {
@@ -3215,25 +3219,27 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 	}	
 
 	//added by Mike, 20190514
-	private static void processDiagnosedCasesHMOClassificationCount(HashMap<String, Integer> diagnosedCasesHMOClassificationContainer, String[] inputColumns, boolean isConsultation) {
-		String diagnosedCaseName = inputColumns[INPUT_DIAGNOSIS_COLUMN].trim().toUpperCase();
+	private static void processDiagnosedCasesClassificationCount(boolean isHMO, String[] inputColumns, boolean isConsultation) {
 		
 		if (!isConsultation) {											
 			if (inputColumns[INPUT_NEW_OLD_PATIENT_COLUMN].trim().toLowerCase().contains("new")) {
-
-				String hmoName = inputColumns[INPUT_CLASS_COLUMN].trim().toUpperCase();
-				
-				if (!diagnosedCasesHMOClassificationContainer.containsKey(hmoName)) {
-					diagnosedCasesHMOClassificationContainer.put(hmoName, 1);
-				}					
-				else {
-					int currentValue = diagnosedCasesHMOClassificationContainer.get(hmoName)+1;
+				if (isHMO) {
+					String hmoName = inputColumns[INPUT_CLASS_COLUMN].trim().toUpperCase();
 					
-/*							System.out.println("diagnosedCaseName: " + diagnosedCaseName);
-					System.out.println("currentValue: " + currentValue);
-*/							
-					diagnosedCasesHMOClassificationContainer.put(hmoName, currentValue);//++); //the existing value of the key is replaced
-				}					
+					if (!diagnosedCasesHMOClassificationContainer.containsKey(hmoName)) {
+						diagnosedCasesHMOClassificationContainer.put(hmoName, 1);
+					}					
+					else {
+						int currentValue = diagnosedCasesHMOClassificationContainer.get(hmoName)+1;
+						
+						diagnosedCasesHMOClassificationContainer.put(hmoName, currentValue);//++); //the existing value of the key is replaced
+					}					
+					
+					totalNewPatientTreatmentHMOTransactionsCount++;
+				}
+				else {
+					totalNewPatientTreatmentCashTransactionsCount++;
+				}
 			}
 		}
 		else {	//TO-DO: -add: handle Consultation transactions
