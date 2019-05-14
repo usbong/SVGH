@@ -184,9 +184,11 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static HashMap<String, double[]> referringDoctorContainer; //added by Mike, 20181218
 	private static HashMap<String, double[]> medicalDoctorContainer; //added by Mike, 20190202
 	private static HashMap<String, Integer> diagnosedCasesContainer; //added by Mike, 20190412
+	private static HashMap<String, Integer> diagnosedCasesHMOContainer; //added by Mike, 20190514
 //	private static HashMap<String, String> knownDiagnosedCasesContainer; //added by Mike, 20190412
 	private static ArrayList<String[]> knownDiagnosedCasesContainerArrayList; //edited by Mike, 20190430
 	private static HashMap<String, Integer> classifiedDiagnosedCasesContainer; //added by Mike, 20190412
+	private static HashMap<String, Integer> classifiedDiagnosedCasesHMOContainer; //added by Mike, 20190514
 	private static HashMap<Integer, Integer[]> treatmentMonthlyStatisticsContainer; //added by Mike, 20190503
 
 	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
@@ -275,6 +277,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static int totalFollowUpPerDoctorCount = 0;
 	private static int totalOldPatientPerDoctorCount = 0;
 	private static int totalTreatmentNewCasesCount = 0; //added by Mike, 20190426
+	private static int totalTreatmentNewHMOCasesCount = 0; //added by Mike, 20190514
 	
 	//added by Mike, 20190426
 	private static int totalDiagnosedCaseCount = 0;
@@ -328,15 +331,15 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	public static void main ( String[] args ) throws Exception
 	{			
 		makeFilePath("output"); //"output" is the folder where I've instructed the add-on software/application to store the output file			
-		PrintWriter treatmentWriter = new PrintWriter("output/MonthlySummaryReportOutputTreatment.html", "UTF-8");			
+		PrintWriter treatmentWriter = new PrintWriter("output/MonthlySummaryReportOutputTreatmentSVGH.html", "UTF-8");			
 /*		
 		PrintWriter consultationWriter = new PrintWriter("output/MonthlySummaryReportOutputConsultation.html", "UTF-8");	
 */		
 		//added by Mike, 20190426
-		PrintWriter treatmentUnclassifiedDiagnosedCasesWriter = new PrintWriter("output/MonthlySummaryReportOfUnclassifiedDiagnosedCasesOutput.html", "UTF-8");	
+		PrintWriter treatmentUnclassifiedDiagnosedCasesWriter = new PrintWriter("output/MonthlySummaryReportOfUnclassifiedDiagnosedCasesOutputSVGH.html", "UTF-8");	
 		
 		//added by Mike, 20190503
-		PrintWriter treatmentCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsTreatment.html", "UTF-8");	
+		PrintWriter treatmentCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsTreatmentSVGH.html", "UTF-8");	
 
 		//added by Mike, 20190503
 /*		PrintWriter consultationCountMonthlyStatisticsWriter = new PrintWriter("output/MonthlyStatisticsConsultation.html", "UTF-8");	
@@ -360,9 +363,12 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		medicalDoctorContainer = new HashMap<String, double[]>(); //added by Mike, 20190202
 				
 		diagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
+		diagnosedCasesHMOContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
+
 //		knownDiagnosedCasesContainer = new HashMap<String, String>(); //added by Mike, 20190412
 		knownDiagnosedCasesContainerArrayList = new ArrayList<String[]>(); //edited by Mike, 20190430
 		classifiedDiagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
+		classifiedDiagnosedCasesHMOContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
 		treatmentMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190503
 
 		//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
@@ -387,8 +393,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		processInputFiles(args, false);
 						
 		//PART/COMPONENT/MODULE/PHASE 4
-		processDiagnosisClassification();						
-				
+		//edited by Mike, 20190514
+		processDiagnosisClassification(diagnosedCasesContainer, classifiedDiagnosedCasesContainer); 
+		//added by Mike, 20190514
+		processDiagnosisClassification(diagnosedCasesHMOContainer, classifiedDiagnosedCasesHMOContainer); 				
 		//added by Mike, 20190125		
 		processContainers();
 	
@@ -2081,7 +2089,13 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 */						
 
 						//added by Mike, 20190413
-						processDiagnosedCasesCount(diagnosedCasesContainer, inputColumns, isConsultation); 
+						if (!isHMO) {
+							processDiagnosedCasesCount(diagnosedCasesContainer, inputColumns, isConsultation); //for Cash transactions
+						}
+						else {
+							//added by Mike, 20190413
+							processDiagnosedCasesCount(diagnosedCasesHMOContainer, inputColumns, isConsultation); //for HMO transactions
+						}
 					}
 				}
 				else {
@@ -2337,6 +2351,11 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 		//added by Mike, 20190417
 		Set<Entry<String, Integer>> classifiedDiagnosedCasesContainerSet = classifiedDiagnosedCasesContainer.entrySet();
         List<Entry<String, Integer>> sortedClassifiedDiagnosedCasesContainerList = new ArrayList<Entry<String, Integer>>(classifiedDiagnosedCasesContainerSet);
+
+		//added by Mike, 20190514
+		SortedSet<String> sortedClassifiedHMOKeyset = new TreeSet<String>(classifiedDiagnosedCasesHMOContainer.keySet());	
+		Set<Entry<String, Integer>> classifiedDiagnosedCasesHMOContainerSet = classifiedDiagnosedCasesHMOContainer.entrySet();
+        List<Entry<String, Integer>> sortedClassifiedDiagnosedCasesHMOContainerList = new ArrayList<Entry<String, Integer>>(classifiedDiagnosedCasesHMOContainerSet);
 		
 		//edited by Mike, 20190418
 		//Removed inner class "Comparator" so that there will be no "generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH$1.class" after compiling the "generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH.java"
@@ -2436,6 +2455,31 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			
 			//added by Mike, 20190426
 			s = s.replace("<?php echo $data['total_new_cases_count'];?>", "" + (int) totalTreatmentNewCasesCount);
+
+			//added by Mike, 20190514
+			if (s.contains("<!-- Table Values: NEW HMO CASES -->")) {
+				totalTreatmentNewHMOCasesCount = 0;
+			
+				for (String key : sortedClassifiedHMOKeyset) {	
+					s = s.concat("\n");
+					s = s.concat("\t\t\t\t\t  <tr>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 1 -->\n");
+					s = s.concat("\t\t\t\t\t     <td>\n");
+					s = s.concat("\t\t\t\t\t		  <b><span>" + key + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t	  </td>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 2 -->\n");
+					s = s.concat("\t\t\t\t\t	  <td>\n");
+					s = s.concat("\t\t\t\t\t	  <b><span>" + classifiedDiagnosedCasesHMOContainer.get(key) + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t     </td>\n");
+					s = s.concat("\t\t\t\t\t  </tr>");
+					
+					//added by Mike, 20190426
+					totalTreatmentNewHMOCasesCount += classifiedDiagnosedCasesHMOContainer.get(key);
+				}			
+			}
+
+			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount);
+
 			
 			//added by Mike, 20190417
 			if (s.contains("<b><span><?php echo $value['name'];?>;&nbsp;</span></b>")) {
@@ -3084,7 +3128,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 //		classificationContainerPerMedicalDoctor = new HashMap<String, HashMap<String, double[]>>();								
 	}
 
-	//added by Mike, 20190413
+	//added by Mike, 20190413; edited by Mike, 20190514
 	private static void processDiagnosedCasesCount(HashMap<String, Integer> diagnosedCasesContainer, String[] inputColumns, boolean isConsultation) {
 			String diagnosedCaseName = inputColumns[INPUT_DIAGNOSIS_COLUMN].trim().toUpperCase();
 			
@@ -3132,8 +3176,9 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			}
 	}	
 	
-	//added by Mike, 20190412
-	private static void processDiagnosisClassification() {
+	//added by Mike, 20190412; edited by Mike, 20190514
+//	private static void processDiagnosisClassification() {
+	private static void processDiagnosisClassification(HashMap<String, Integer> diagnosedCasesContainer, HashMap<String, Integer> classifiedDiagnosedCasesContainer) {
 		SortedSet<String> sortedKeyset = new TreeSet<String>(diagnosedCasesContainer.keySet());
 		
 		//edited by Mike, 20190430
