@@ -185,6 +185,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static HashMap<String, double[]> medicalDoctorContainer; //added by Mike, 20190202
 	private static HashMap<String, Integer> diagnosedCasesContainer; //added by Mike, 20190412
 	private static HashMap<String, Integer> diagnosedCasesHMOContainer; //added by Mike, 20190514
+	private static HashMap<String, Integer> diagnosedCasesHMOClassificationContainer; //added by Mike, 20190514
 //	private static HashMap<String, String> knownDiagnosedCasesContainer; //added by Mike, 20190412
 	private static ArrayList<String[]> knownDiagnosedCasesContainerArrayList; //edited by Mike, 20190430
 	private static HashMap<String, Integer> classifiedDiagnosedCasesContainer; //added by Mike, 20190412
@@ -364,7 +365,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				
 		diagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
 		diagnosedCasesHMOContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
-
+		diagnosedCasesHMOClassificationContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
+		
 //		knownDiagnosedCasesContainer = new HashMap<String, String>(); //added by Mike, 20190412
 		knownDiagnosedCasesContainerArrayList = new ArrayList<String[]>(); //edited by Mike, 20190430
 		classifiedDiagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
@@ -2089,12 +2091,15 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 */						
 
 						//added by Mike, 20190413
-						if (!isHMO) {
-							processDiagnosedCasesCount(diagnosedCasesContainer, inputColumns, isConsultation); //for Cash transactions
+						if (!isHMO) { //for Cash transactions
+							processDiagnosedCasesCount(diagnosedCasesContainer, inputColumns, isConsultation); 
 						}
-						else {
+						else { //for HMO transactions
 							//added by Mike, 20190413
-							processDiagnosedCasesCount(diagnosedCasesHMOContainer, inputColumns, isConsultation); //for HMO transactions
+							processDiagnosedCasesCount(diagnosedCasesHMOContainer, inputColumns, isConsultation); 
+							
+							//added by Mike, 20190514
+							processDiagnosedCasesHMOClassificationCount(diagnosedCasesHMOClassificationContainer, inputColumns, isConsultation); 
 						}
 					}
 				}
@@ -2357,6 +2362,13 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 		Set<Entry<String, Integer>> classifiedDiagnosedCasesHMOContainerSet = classifiedDiagnosedCasesHMOContainer.entrySet();
         List<Entry<String, Integer>> sortedClassifiedDiagnosedCasesHMOContainerList = new ArrayList<Entry<String, Integer>>(classifiedDiagnosedCasesHMOContainerSet);
 		
+		//added by Mike, 20190514
+		SortedSet<String> sortedClassifiedHMOClassificationKeyset = new TreeSet<String>(diagnosedCasesHMOClassificationContainer.keySet());	
+		Set<Entry<String, Integer>> diagnosedCasesHMOClassificationContainerSet = diagnosedCasesHMOClassificationContainer.entrySet();
+        List<Entry<String, Integer>> sortedDiagnosedCasesHMOClassificationContainerList = new ArrayList<Entry<String, Integer>>(diagnosedCasesHMOClassificationContainerSet);
+		
+		
+		
 		//edited by Mike, 20190418
 		//Removed inner class "Comparator" so that there will be no "generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH$1.class" after compiling the "generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH.java"
 		/*Collections.sort(sortedClassifiedDiagnosedCasesContainerList, new Comparator<Map.Entry<String, Integer>>() {
@@ -2479,6 +2491,32 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			}
 
 			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount);
+			
+			//added by Mike, 20190514
+			if (s.contains("<!-- Table Values: HMO CARD NAME -->")) {
+				totalTreatmentNewHMOCasesCount = 0;
+			
+				for (String key : sortedClassifiedHMOClassificationKeyset) {	
+					s = s.concat("\n");
+					s = s.concat("\t\t\t\t\t  <tr>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 1 -->\n");
+					s = s.concat("\t\t\t\t\t     <td>\n");
+					s = s.concat("\t\t\t\t\t		  <b><span>" + key + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t	  </td>\n");
+					s = s.concat("\t\t\t\t\t	  <!-- Column 2 -->\n");
+					s = s.concat("\t\t\t\t\t	  <td>\n");
+					s = s.concat("\t\t\t\t\t	  <b><span>" + diagnosedCasesHMOClassificationContainer.get(key) + "</span></b>\n");
+					s = s.concat("\t\t\t\t\t     </td>\n");
+					s = s.concat("\t\t\t\t\t  </tr>");
+					
+					//added by Mike, 20190426
+					totalTreatmentNewHMOCasesCount += diagnosedCasesHMOClassificationContainer.get(key);
+				}			
+			}
+
+			s = s.replace("<?php echo $data['total_new_cases_hmo_transactions_count'];?>", "" + (int) totalTreatmentNewHMOCasesCount);
+			
+			
 
 			
 			//added by Mike, 20190417
@@ -3174,6 +3212,32 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			}
 			else {	//TO-DO: -add: handle Consultation transactions
 			}
+	}	
+
+	//added by Mike, 20190514
+	private static void processDiagnosedCasesHMOClassificationCount(HashMap<String, Integer> diagnosedCasesHMOClassificationContainer, String[] inputColumns, boolean isConsultation) {
+		String diagnosedCaseName = inputColumns[INPUT_DIAGNOSIS_COLUMN].trim().toUpperCase();
+		
+		if (!isConsultation) {											
+			if (inputColumns[INPUT_NEW_OLD_PATIENT_COLUMN].trim().toLowerCase().contains("new")) {
+
+				String hmoName = inputColumns[INPUT_CLASS_COLUMN].trim().toUpperCase();
+				
+				if (!diagnosedCasesHMOClassificationContainer.containsKey(hmoName)) {
+					diagnosedCasesHMOClassificationContainer.put(hmoName, 1);
+				}					
+				else {
+					int currentValue = diagnosedCasesHMOClassificationContainer.get(hmoName)+1;
+					
+/*							System.out.println("diagnosedCaseName: " + diagnosedCaseName);
+					System.out.println("currentValue: " + currentValue);
+*/							
+					diagnosedCasesHMOClassificationContainer.put(hmoName, currentValue);//++); //the existing value of the key is replaced
+				}					
+			}
+		}
+		else {	//TO-DO: -add: handle Consultation transactions
+		}
 	}	
 	
 	//added by Mike, 20190412; edited by Mike, 20190514
