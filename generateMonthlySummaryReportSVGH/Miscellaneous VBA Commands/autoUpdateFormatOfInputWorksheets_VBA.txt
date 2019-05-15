@@ -31,7 +31,10 @@ Sub autoUpdateFormatOfInputWorksheets()
 ' edited by: phuclv on 20161120
 Dim myInput As Worksheet
 Dim row As Range
+Dim column As Range
 Dim RowCount As Integer
+Dim ColumnCount As Integer
+Dim MAX_COLUMNS As Integer
 
 'added by Mike, 20190325
 Dim INPUT_NON_MASTER_LIST_OFFSET As Integer
@@ -46,16 +49,32 @@ INPUT_NON_MASTER_LIST_OFFSET = 1 '0
 MS_EXCEL_OFFSET = 1
 INPUT_DATE_COLUMN = 1 - INPUT_NON_MASTER_LIST_OFFSET + MS_EXCEL_OFFSET 'Column 1
 
+MAX_COLUMNS = 19 - INPUT_NON_MASTER_LIST_OFFSET + MS_EXCEL_OFFSET 'Column 19
+
 Set inputWorkbook = Application.ThisWorkbook
 
 Set myCashPTInput = inputWorkbook.Sheets("Cash_PT_Report_Input")
 Set myHMOPTInput = inputWorkbook.Sheets("HMO_PT_Report_Input")
 
 RowCount = 1
+ColumnCount = 1
+
 Set myInput = myCashPTInput
 For Each row In myInput.Rows
         myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
+        
+        'added by Mike, 20190515
+        ColumnCount = 1
+        For Each column In myInput.Columns
+            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Value), vbLf, "")
 
+            ColumnCount = ColumnCount + 1
+            
+            If (ColumnCount = MAX_COLUMNS) Then
+              Exit For
+            End If
+        Next column
+        
         RowCount = RowCount + 1
                             
         If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
@@ -67,6 +86,18 @@ RowCount = 1
 Set myInput = myHMOPTInput
 For Each row In myInput.Rows
         myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
+                            
+        'added by Mike, 20190515
+        ColumnCount = 1
+        For Each column In myInput.Columns
+            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Value), vbLf, "")
+
+            ColumnCount = ColumnCount + 1
+            
+            If (ColumnCount = MAX_COLUMNS) Then
+              Exit For
+            End If
+        Next column
                             
         RowCount = RowCount + 1
                             
