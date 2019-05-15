@@ -1,0 +1,82 @@
+Sub autoUpdateFormatOfInputWorksheets()
+' Copyright 2019 Usbong Social Systems, Inc.
+'
+' Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You ' may obtain a copy of the License at
+'
+' http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, ' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing ' permissions and limitations under the License.
+'
+' @author: Michael Syson
+' @date created: 20190515
+' @date updated: 20190515
+'
+' Input Workbook with PT Treatment Worksheets (Cash and HMO)
+' Given:
+' 1) "Cash_PT_Report_Input" Worksheet
+' 2) "HMO_PT_Report_Input" Worksheet
+'
+' Output:
+' 1) Automatically updated format of select columns in the Input Workbook's PT Treatment Worksheets
+' Example: "04/01/2019" becomes "Apr-01-2019"
+'
+' Notes:
+' 1) We recommend that the input workbook is saved as an Excel Macro-Enabled Workbook, i.e. .xlsm.
+' --> Otherwise, you'll need to create and put this set of VBA instructions in the workbook every time.
+'
+' Reference:
+' 1) https://superuser.com/questions/841398/how-to-convert-excel-file-with-multiple-sheets-to-a-set-of-csv-files;
+' last accessed: 20181105
+' answer by: gtwebb on 20141118
+' edited by: phuclv on 20161120
+Dim myInput As Worksheet
+Dim row As Range
+Dim RowCount As Integer
+
+'added by Mike, 20190325
+Dim INPUT_NON_MASTER_LIST_OFFSET As Integer
+Dim MS_EXCEL_OFFSET As Integer
+
+Dim INPUT_REFERRING_DOCTOR_COLUMN As Integer
+Dim INPUT_NOTES_COLUMN As Integer
+Dim INPUT_DATE_COLUMN As Integer
+
+'set the values of the defined terms, i.e. value-holders
+INPUT_NON_MASTER_LIST_OFFSET = 1 '0
+MS_EXCEL_OFFSET = 1
+INPUT_DATE_COLUMN = 1 - INPUT_NON_MASTER_LIST_OFFSET + MS_EXCEL_OFFSET 'Column 1
+
+Set inputWorkbook = Application.ThisWorkbook
+
+Set myCashPTInput = inputWorkbook.Sheets("Cash_PT_Report_Input")
+Set myHMOPTInput = inputWorkbook.Sheets("HMO_PT_Report_Input")
+
+RowCount = 1
+Set myInput = myCashPTInput
+For Each row In myInput.Rows
+        myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
+
+        RowCount = RowCount + 1
+                            
+        If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
+          Exit For
+        End If
+Next row
+
+RowCount = 1
+Set myInput = myHMOPTInput
+For Each row In myInput.Rows
+        myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
+                            
+        RowCount = RowCount + 1
+                            
+        If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
+          Exit For
+        End If
+Next row
+
+'Save the workbook
+'ActiveWorkbook.SaveAs Filename:=path
+inputWorkbook.Save
+
+End Sub
