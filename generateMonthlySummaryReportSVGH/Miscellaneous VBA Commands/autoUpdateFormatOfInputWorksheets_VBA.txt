@@ -1,4 +1,4 @@
-Sub autoUpdateFormatOfInputWorksheets()
+Sub autoUpdateFormatOfInputWorksheetsMain()
 ' Copyright 2019 Usbong Social Systems, Inc.
 '
 ' Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You ' may obtain a copy of the License at
@@ -29,6 +29,46 @@ Sub autoUpdateFormatOfInputWorksheets()
 ' last accessed: 20181105
 ' answer by: gtwebb on 20141118
 ' edited by: phuclv on 20161120
+
+'edited by Mike, 20190516
+'Dim myInput As Worksheet
+Dim myCashPTInput As Worksheet
+Dim myHMOPTInput As Worksheet
+
+Set inputWorkbook = Application.ThisWorkbook
+
+Set myCashPTInput = inputWorkbook.Sheets("Cash_PT_Report_Input")
+Set myHMOPTInput = inputWorkbook.Sheets("HMO_PT_Report_Input")
+
+'edited by Mike, 20190516
+Call autoUpdateFormatOfInputWorksheet(myCashPTInput)
+Call autoUpdateFormatOfInputWorksheet(myHMOPTInput)
+
+'Save the workbook
+'ActiveWorkbook.SaveAs Filename:=path
+'inputWorkbook.Save
+
+End Sub
+
+Private Sub autoUpdateFormatOfInputWorksheet(myInputWorksheet As Worksheet)
+' Copyright 2019 Usbong Social Systems, Inc.
+'
+' Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You ' may obtain a copy of the License at
+'
+' http://www.apache.org/licenses/LICENSE-2.0
+'
+' Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, ' WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing ' permissions and limitations under the License.
+'
+' @author: Michael Syson
+' @date created: 20190516
+' @date updated: 20190516
+'
+' Input PT Treatment Worksheet
+'
+' Output:
+' 1) Automatically updated format of select columns in the Input Worksheet
+' Example: "04/01/2019" becomes "Apr-01-2019"
+'
 Dim myInput As Worksheet
 Dim row As Range
 Dim column As Range
@@ -51,15 +91,10 @@ INPUT_DATE_COLUMN = 1 - INPUT_NON_MASTER_LIST_OFFSET + MS_EXCEL_OFFSET 'Column 1
 
 MAX_COLUMNS = 19 - INPUT_NON_MASTER_LIST_OFFSET + MS_EXCEL_OFFSET 'Column 19
 
-Set inputWorkbook = Application.ThisWorkbook
-
-Set myCashPTInput = inputWorkbook.Sheets("Cash_PT_Report_Input")
-Set myHMOPTInput = inputWorkbook.Sheets("HMO_PT_Report_Input")
-
 RowCount = 1
 ColumnCount = 1
 
-Set myInput = myCashPTInput
+Set myInput = myInputWorksheet
 For Each row In myInput.Rows
         myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
 
@@ -76,30 +111,6 @@ For Each row In myInput.Rows
             End If
         Next column
                                 
-        RowCount = RowCount + 1
-                            
-        If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
-          Exit For
-        End If
-Next row
-
-RowCount = 1
-Set myInput = myHMOPTInput
-For Each row In myInput.Rows
-        'added by Mike, 20190515
-        ColumnCount = 1
-        For Each column In myInput.Columns
-            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Text), vbLf, "")
-
-            ColumnCount = ColumnCount + 1
-            
-            If (ColumnCount = MAX_COLUMNS) Then
-              Exit For
-            End If
-        Next column
-        
-        myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
-                            
         RowCount = RowCount + 1
                             
         If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
