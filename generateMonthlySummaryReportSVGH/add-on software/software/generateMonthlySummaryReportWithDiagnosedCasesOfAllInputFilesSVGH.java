@@ -75,8 +75,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static boolean isNetPFComputed = false; //added by Mike, 20190131
 
 	private static String inputFilename = "input201801"; //without extension; default input file
-	//added by Mike, 20190413
-	private static String diagnosedCasesListInputFilename = "diagnosedCasesList"; //without extension; default input file 
+	//added by Mike, 20190413; edited by Mike, 20190515
+	//At present, this add-on software gets as input all .txt files inside the assets folder
+	private static String knownDiagnosedCasesListInputFilename = "KnownDiagnosedCasesList"; //without extension; default input file 
 
 	//added by Mike, 20190414; edited by Mike, 20190513
 	private static String inputOutputTemplateFilenameTreatment = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatmentSVGH";//without extension; default input file 
@@ -97,6 +98,12 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static String inputOutputTemplateFilenameMonthlyStatistics = "assets\\templates\\generateMonthlySummaryReportOutputTemplateMonthlyStatistics";
 	private static String inputDataFilenameTreatmentMonthlyStatistics = "assets\\transactions\\treatmentCountList";
 
+	//added by Mike, 20190516
+	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
+	//without extension; default input file 
+	private static String inputOutputTemplateFilenameMonthlyStatisticsSVGH = "assets\\templates\\generateMonthlySummaryReportOutputTemplateMonthlyStatisticsSVGH";
+	//This pertains to the number of transactions handled by each Physical Therapist (PT) member
+	
 	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.	
 	private static String inputDataFilenameConsultationMonthlyStatistics = "assets\\transactions\\consultationCountList";
 	private static String inputDataFilenameProcedureMonthlyStatistics = "assets\\transactions\\procedureCountList";
@@ -151,6 +158,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int INPUT_NEW_OLD_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET;
 	private static final int INPUT_NEW_OLD_PATIENT_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190102
 */	
+
+	//added by Mike, 20190516
+	private static final int INPUT_PT_NAME_COLUMN = 17 - INPUT_NON_MASTER_LIST_OFFSET;
+
 	//TO-DO: -add: column for Consultation transactions, which have both Chief Complaint and Diagnosis
 	private static final int INPUT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;//6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
 
@@ -191,12 +202,15 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static HashMap<String, Integer> classifiedDiagnosedCasesContainer; //added by Mike, 20190412
 	private static HashMap<String, Integer> classifiedDiagnosedCasesHMOContainer; //added by Mike, 20190514
 	private static HashMap<Integer, Integer[]> treatmentMonthlyStatisticsContainer; //added by Mike, 20190503
+	private static HashMap<String, Integer[]> physicalTherapistContainer; //added by Mike, 20190516
 
 	//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 	private static HashMap<Integer, Integer[]> consultationMonthlyStatisticsContainer; //added by Mike, 20190504
 	private static HashMap<Integer, Integer[]> procedureMonthlyStatisticsContainer; //added by Mike, 20190504
 
 	private static ArrayList<Integer> yearsContainerArrayList; //added by Mike, 20190503
+
+	private static Integer[] outputPTTransactionsCountColumnValuesArray; //added by Mike, 20190516
 	
 	private static double[] columnValuesArray;
 	private static String[] dateValuesArray; //added by Mike, 20180412
@@ -205,6 +219,23 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static String dateValue; //added by Mike, 20190427
 	private static int dateValueInt; //added by Mike, 20190427
 		
+	//added by Mike, 20190516
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS = 13; //starts at 0
+
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_PT_NAME_COLUMN = 0;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_CASH_COLUMN = 1;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN = 2;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN = 3;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN = 4;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SHOCK_WAVE_CASH_COLUMN = 5;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SHOCK_WAVE_HMO_COLUMN = 6;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_LASER_CASH_COLUMN = 7;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_LASER_HMO_COLUMN = 8;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_1_COLUMN = 9;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_2_COLUMN = 10;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_3_COLUMN = 11;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMN = 12;
+				
 	//the date and the referring doctor are not yet included here
 	//this is for both HMO and NON-HMO transactions
 	private static final int OUTPUT_TOTAL_COLUMNS = 25; //edited by Mike, 20190202
@@ -366,7 +397,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 //		medicalDoctorContainer = new HashMap<String, double[]>();
 		classificationContainerPerMedicalDoctor = new HashMap<String, HashMap<String, double[]>>();				
 		medicalDoctorContainer = new HashMap<String, double[]>(); //added by Mike, 20190202
-				
+		physicalTherapistContainer = new HashMap<String, Integer[]>(); //added by Mike, 20190516
+		
 		diagnosedCasesContainer = new HashMap<String, Integer>(); //added by Mike, 20190412
 		diagnosedCasesHMOContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
 		diagnosedCasesHMOClassificationContainer = new HashMap<String, Integer>(); //added by Mike, 20190514
@@ -393,11 +425,11 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 
 		//PART/COMPONENT/MODULE/PHASE 2
 		processInputFiles(args, true);
-
+/*
 		//PART/COMPONENT/MODULE/PHASE 3		
 		setClassificationContainerPerMedicalDoctor(classificationContainerPerMedicalDoctor);
 		processInputFiles(args, false);
-						
+*/						
 		//PART/COMPONENT/MODULE/PHASE 4
 		//edited by Mike, 20190514
 		processDiagnosisClassification(diagnosedCasesContainer, classifiedDiagnosedCasesContainer); 
@@ -407,7 +439,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		processContainers();
 	
 		//added by Mike, 20190503; edited by Mike, 20190504
-		processMonthlyStatisticsData(TREATMENT_FILE_TYPE);
+/*		processMonthlyStatisticsData(TREATMENT_FILE_TYPE);
+*/
+		
 /*		
 		processMonthlyStatisticsData(CONSULTATION_FILE_TYPE);
 		processMonthlyStatisticsData(PROCEDURE_FILE_TYPE);
@@ -458,9 +492,12 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			processWriteOutputFileTreatment(treatmentWriter);
 			//added by Mike, 20190426
 			processWriteOutputFileTreatmentUnclassifiedDiagnosedCases(treatmentUnclassifiedDiagnosedCasesWriter);
-			
+
+/*			
 			//added by Mike, 20190503; edited by Mike, 20190504
 			processWriteOutputFileMonthlyStatistics(treatmentCountMonthlyStatisticsWriter, TREATMENT_FILE_TYPE);		
+*/
+			
 /*			
 			processWriteOutputFileMonthlyStatistics(consultationCountMonthlyStatisticsWriter, CONSULTATION_FILE_TYPE);		
 			processWriteOutputFileMonthlyStatistics(procedureCountMonthlyStatisticsWriter, PROCEDURE_FILE_TYPE);		
@@ -1717,6 +1754,82 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		}
 	}
 	
+	//added by Mike, 20190516
+	private static void processPhysicalTherapyTransactionCount(HashMap<String, Integer[]> physicalTherapyContainer, String[] inputColumns, Boolean isHMO, String inputFilename) {		
+		if (!isConsultation) {
+			String inputPhysicalTherapist = inputColumns[INPUT_PT_NAME_COLUMN].trim().toUpperCase();
+	
+//			System.out.println("inputPhysicalTherapist: "+inputPhysicalTherapist);
+	
+			if (!physicalTherapistContainer.containsKey(inputPhysicalTherapist)) {
+				outputPTTransactionsCountColumnValuesArray = new Integer[OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS];
+
+				//added by Mike, 20190516
+				//set initial values to 0
+				for (int i=0; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS; i++) {
+					outputPTTransactionsCountColumnValuesArray[i] = 0;
+				}
+								
+				if (isHMO) {
+					//TO-DO: -update: this
+					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("SWT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("LASER")) {
+					}
+					//default
+					else {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN] = 1;
+					}
+				}
+				else {
+					//TO-DO: -update: this
+					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("SWT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("LASER")) {
+					}
+					//default
+					else {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_CASH_COLUMN] = 1;
+					}
+				}
+				
+				physicalTherapistContainer.put(inputPhysicalTherapist, outputPTTransactionsCountColumnValuesArray);
+			}
+			else {
+				if (isHMO) {
+					//TO-DO: -update: this
+					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("SWT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("LASER")) {
+					}
+					//default
+					else {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN]++;
+					}
+				}
+				else {
+					//TO-DO: -update: this
+					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("SWT")) {
+					}
+					else if (inputFilename.toLowerCase().contains("LASER")) {
+					}
+					//default
+					else {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_CASH_COLUMN]++;
+					}
+				}
+			}			
+		}
+	}
+	
 	//added by Mike, 20181220
 	private static void processMedicalDoctorTransactionPerClassificationCount(HashMap<String, HashMap<String, double[]>> classificationContainerPerMedicalDoctor, String[] inputColumns, Boolean isConsultation) {				
 
@@ -2105,7 +2218,9 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						
 						//added by Mike, 20190514
 						processDiagnosedCasesClassificationCount(isHMO, inputColumns, isConsultation); 
-
+						
+						//added by Mike, 20190516
+						processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);
 					}
 				}
 				else {
