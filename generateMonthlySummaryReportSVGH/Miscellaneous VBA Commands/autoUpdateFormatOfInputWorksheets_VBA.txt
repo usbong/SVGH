@@ -9,7 +9,7 @@ Sub autoUpdateFormatOfInputWorksheets()
 '
 ' @author: Michael Syson
 ' @date created: 20190515
-' @date updated: 20190515
+' @date updated: 20190516
 '
 ' Input Workbook with PT Treatment Worksheets (Cash and HMO)
 ' Given:
@@ -62,11 +62,12 @@ ColumnCount = 1
 Set myInput = myCashPTInput
 For Each row In myInput.Rows
         myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
-        
+
         'added by Mike, 20190515
         ColumnCount = 1
         For Each column In myInput.Columns
-            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Value), vbLf, "")
+
+            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Text), vbLf, "")
 
             ColumnCount = ColumnCount + 1
             
@@ -74,7 +75,7 @@ For Each row In myInput.Rows
               Exit For
             End If
         Next column
-        
+                                
         RowCount = RowCount + 1
                             
         If IsEmpty(myInput.Cells(RowCount, INPUT_DATE_COLUMN).Value) Then
@@ -85,12 +86,10 @@ Next row
 RowCount = 1
 Set myInput = myHMOPTInput
 For Each row In myInput.Rows
-        myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
-                            
         'added by Mike, 20190515
         ColumnCount = 1
         For Each column In myInput.Columns
-            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Value), vbLf, "")
+            myInput.Cells(RowCount, ColumnCount).Value = Replace(Trim(myInput.Cells(RowCount, ColumnCount).Text), vbLf, "")
 
             ColumnCount = ColumnCount + 1
             
@@ -98,6 +97,8 @@ For Each row In myInput.Rows
               Exit For
             End If
         Next column
+        
+        myInput.Cells(RowCount, INPUT_DATE_COLUMN).NumberFormat = "mmm-dd-yyyy"
                             
         RowCount = RowCount + 1
                             
