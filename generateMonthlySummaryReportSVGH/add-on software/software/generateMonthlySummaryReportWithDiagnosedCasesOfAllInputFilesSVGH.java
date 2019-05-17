@@ -478,7 +478,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 */		
 
 		//added by Mike, 20190415; edited by Mike, 20190426
-		processAutoCalculate();
+		//processAutoCalculate();
 /*		if (!processAutoCalculate()) { //if there are no input files
 			treatmentWriter.close();
 			consultationWriter.close();		
@@ -2450,6 +2450,9 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 				//s = s.concat("\n");				
 			}				
 
+			//added by Mike, 20190517
+			int ptMemberTransactionRowTotal;
+			
 			if (s.contains("<!-- PT NAME and PT TRANSACTION COUNT Rows -->")) {				
 				for (String ptNameKey : sortedKeyset) {									
 					s = s.concat("\n");											
@@ -2460,14 +2463,29 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 					s = s.concat("\t\t\t\t  <div class=\"name\"><b><span>"+ptNameKey+"</span></b></div>\n");
 					s = s.concat("\t\t\t  </td>\n");
 
+					//added by Mike, 20190517
+					ptMemberTransactionRowTotal = 0;
+					
 					//start at 1, not 0, because 1 is for the PT Name
-					for(int i=1; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS; i++) {
+					//Do not include the last column, which is for the total transaction count of each row.
+					for(int i=1; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS-1; i++) {
 						s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE "+physicalTherapistContainer.get(ptNameKey)[i]+": Columns -->\n");
 						s = s.concat("\t\t\t<!-- Column 1 -->\n");
 						s = s.concat("\t\t\t<td>\n");
 						s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");
 						s = s.concat("\t\t\t</td>\n");
+						
+						ptMemberTransactionRowTotal += physicalTherapistContainer.get(ptNameKey)[i];
 					}
+					
+					//added by Mike, 20190517
+					//This is for the last column, which is for the total transaction count of each row.
+					s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE "+physicalTherapistContainer.get(ptNameKey)[OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS-1]+": Columns -->\n");
+					s = s.concat("\t\t\t<!-- Column 1 -->\n");
+					s = s.concat("\t\t\t<td>\n");
+					s = s.concat("\t\t\t\t<b><span>"+ptMemberTransactionRowTotal+"</span></b>\n");
+					s = s.concat("\t\t\t</td>\n");
+					
 					s = s.concat("\t\t  </tr>\n");
 				}			
 			}
