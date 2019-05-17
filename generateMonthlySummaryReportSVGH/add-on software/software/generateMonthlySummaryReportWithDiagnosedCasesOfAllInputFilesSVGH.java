@@ -2451,9 +2451,18 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			}				
 
 			//added by Mike, 20190517
+			ArrayList<Integer> transactionTypeColumnTotalArrayList = new ArrayList<Integer>();			
+			int transactionTypeColumnTotal;
 			int ptMemberTransactionRowTotal;
 			
 			if (s.contains("<!-- PT NAME and PT TRANSACTION COUNT Rows -->")) {				
+				//added by Mike, 20190517				
+				transactionTypeColumnTotalArrayList.add(0,-1);//put a -1 value for the PT Name					
+				//set default values for the rest of the column after the PT Name to 0
+				for (int i=1; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS; i++) {
+					transactionTypeColumnTotalArrayList.add(i, 0);						
+				}			
+					
 				for (String ptNameKey : sortedKeyset) {									
 					s = s.concat("\n");											
 					s = s.concat("\t\t  <!-- NAME "+ptNameKey+": Row -->\n");
@@ -2463,10 +2472,11 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 					s = s.concat("\t\t\t\t  <div class=\"name\"><b><span>"+ptNameKey+"</span></b></div>\n");
 					s = s.concat("\t\t\t  </td>\n");
 
-					//added by Mike, 20190517
+		
+					transactionTypeColumnTotal = 0;									
 					ptMemberTransactionRowTotal = 0;
 					
-					//start at 1, not 0, because 1 is for the PT Name
+					//start at 1, not 0, because 0 is for the PT Name
 					//Do not include the last column, which is for the total transaction count of each row.
 					for(int i=1; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS-1; i++) {
 						s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE "+physicalTherapistContainer.get(ptNameKey)[i]+": Columns -->\n");
@@ -2474,7 +2484,13 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						s = s.concat("\t\t\t<td>\n");
 						s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");
 						s = s.concat("\t\t\t</td>\n");
-						
+
+						//added by Mike, 20190517
+						int currentTotalCount = transactionTypeColumnTotalArrayList.get(i) + physicalTherapistContainer.get(ptNameKey)[i];
+						transactionTypeColumnTotalArrayList.set(i, currentTotalCount);
+																		
+//						System.out.println("column#: "+i+"; currentTotalCount: "+currentTotalCount);
+																		
 						ptMemberTransactionRowTotal += physicalTherapistContainer.get(ptNameKey)[i];
 					}
 					
@@ -2485,9 +2501,34 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 					s = s.concat("\t\t\t<td>\n");
 					s = s.concat("\t\t\t\t<b><span>"+ptMemberTransactionRowTotal+"</span></b>\n");
 					s = s.concat("\t\t\t</td>\n");
-					
+
 					s = s.concat("\t\t  </tr>\n");
+
+					//added by Mike, 20190517
+					int currentTotalCount = transactionTypeColumnTotalArrayList.get(OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS-1) + ptMemberTransactionRowTotal;
+					transactionTypeColumnTotalArrayList.set(OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS-1, currentTotalCount);					
 				}			
+				
+				//TOTAL row for each column
+//				for(int i=0; i<transactionTypeColumnTotalArrayList.size(); i++) {
+				int count = 0;
+				s = s.concat("\t\t  <tr>\n");
+				//do not include the column for PT Name
+				s = s.concat("\t\t\t<td>\n");
+				s = s.concat("\t\t\t\t<b><span>TOTAL</span></b>\n");
+				s = s.concat("\t\t\t</td>\n");
+				
+//				for (String ptNameKey : sortedKeyset) {									
+				for(int i=1; i<transactionTypeColumnTotalArrayList.size(); i++) {
+					s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE #" + i + ": Columns -->\n");
+					s = s.concat("\t\t\t<!-- Column -->\n");
+					s = s.concat("\t\t\t<td>\n");
+					s = s.concat("\t\t\t\t<b><span>"+transactionTypeColumnTotalArrayList.get(i)+"</span></b>\n");
+					s = s.concat("\t\t\t</td>\n");
+					
+//					count++;
+				}
+				s = s.concat("\t\t  </tr>\n");
 			}
 							
 			writer.print(s + "\n");		
