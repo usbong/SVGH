@@ -209,6 +209,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static HashMap<Integer, Integer[]> procedureMonthlyStatisticsContainer; //added by Mike, 20190504
 
 	private static ArrayList<Integer> yearsContainerArrayList; //added by Mike, 20190503
+	private static ArrayList<String> treatmentTransactionTypeContainerArrayList; //added by Mike, 20190517
 
 	private static Integer[] outputPTTransactionsCountColumnValuesArray; //added by Mike, 20190516
 	
@@ -419,6 +420,23 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		dateValuesArrayInt = new int[args.length]; //added by Mike, 20180412
 		//dateValuesArrayInt = new ArrayList<int>(); //edited by Mike, 20181221
 
+		//added by Mike, 20190517
+		treatmentTransactionTypeContainerArrayList = new ArrayList<String>(); //OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS
+		
+		treatmentTransactionTypeContainerArrayList.add(0, "PT STAFF");
+		treatmentTransactionTypeContainerArrayList.add(1, "CASH");
+		treatmentTransactionTypeContainerArrayList.add(2, "HMO");
+		treatmentTransactionTypeContainerArrayList.add(3, "IN-PT CASH");
+		treatmentTransactionTypeContainerArrayList.add(4, "IN-PT HMO");
+		treatmentTransactionTypeContainerArrayList.add(5, "SWT CASH");
+		treatmentTransactionTypeContainerArrayList.add(6, "SWT HMO");
+		treatmentTransactionTypeContainerArrayList.add(7, "LASER CASH");
+		treatmentTransactionTypeContainerArrayList.add(8, "LASER HMO");
+		treatmentTransactionTypeContainerArrayList.add(9, "1");
+		treatmentTransactionTypeContainerArrayList.add(10, "2");
+		treatmentTransactionTypeContainerArrayList.add(11, "3");
+		treatmentTransactionTypeContainerArrayList.add(12, "TOTAL");
+		
 		//added by Mike, 20190412
 		//PART/COMPONENT/MODULE/PHASE 1			
 		processKnownDiagnosedCasesInputFile(args);
@@ -493,6 +511,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			//added by Mike, 20190426
 			processWriteOutputFileTreatmentUnclassifiedDiagnosedCases(treatmentUnclassifiedDiagnosedCasesWriter);
 
+			//added by Mike, 20190517
+			processWriteOutputFileMonthlyStatisticsTreatmentSVGH(treatmentCountMonthlyStatisticsWriter, TREATMENT_FILE_TYPE);
+			
 /*			
 			//added by Mike, 20190503; edited by Mike, 20190504
 			processWriteOutputFileMonthlyStatistics(treatmentCountMonthlyStatisticsWriter, TREATMENT_FILE_TYPE);		
@@ -2329,6 +2350,8 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			s = s.replace("<?php echo $data['total_new_hmo_cases_count'];?>", "" + (int) totalDiagnosedCaseHMOCount + "/" + totalNewPatientTreatmentHMOTransactionsCount);
 
 			
+
+
 			//added by Mike, 20190514
 			if (s.contains("<!-- Table Values: HMO CARD NAME -->")) {
 				totalTreatmentNewHMOCasesCount = 0;
@@ -2359,7 +2382,102 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 		writer.close();
 	}
 
+	//added by Mike, 20190517
+	private static void processWriteOutputFileMonthlyStatisticsTreatmentSVGH(PrintWriter writer, int fileType) throws Exception {		
+		File f = new File(inputOutputTemplateFilenameMonthlyStatisticsSVGH+".html");
+
+		System.out.println("inputOutputTemplateFilenameMonthlyStatisticsSVGH: " + inputOutputTemplateFilenameMonthlyStatisticsSVGH);
+		
+		Scanner sc = new Scanner(new FileInputStream(f), "UTF-8");				
+	
+		String s;		
+//			s=sc.nextLine(); //skip the first row, which is the input file's table headers
+
+		if (isInDebugMode) {
+			rowCount=0;
+		}
+
+		SortedSet<String> sortedKeyset = new TreeSet<String>(physicalTherapistContainer.keySet());
+//		SortedSet<String> sortedClassifiedKeyset = new TreeSet<String>(classifiedDiagnosedCasesContainer.keySet());
+
+		boolean hasWrittenAutoCalculatedValue=false;
+
+		//count/compute the number-based values of inputColumns 
+		while (sc.hasNextLine()) {
+			s=sc.nextLine();
+/*			
+			//if the row is blank
+			if (s.trim().equals("")) {
+				continue;
+			}
+*/			
+			if (isInDebugMode) {
+				rowCount++;
+//				System.out.println("rowCount: "+rowCount);
+			}
+			
+			s = s.replace("<?php echo $data['date'];?>", "" + dateValue.toUpperCase());
+
+			//added by Mike, 20190504
+			if (s.contains("<!-- FILE TYPE -->")) {
+				String fileTypeString = "";
+				switch (fileType) {
+					case TREATMENT_FILE_TYPE:
+						fileTypeString = "TREATMENT";
+						break;
+					case CONSULTATION_FILE_TYPE:
+						fileTypeString = "CONSULTATION";
+						break;
+					default:// PROCEDURE_FILE_TYPE:
+						fileTypeString = "PROCEDURE";
+						break;
+				}			
+				s = s.concat("\n");
+				s = s.concat(fileTypeString+"\n");
+			}			
 						
+			if (s.contains("<!-- Physical Therapist (PT) Transaction Type Name Column -->")) {
+				for(int i=0; i<treatmentTransactionTypeContainerArrayList.size(); i++) {
+					String transactionTypeNameKey = treatmentTransactionTypeContainerArrayList.get(i);
+					s = s.concat("\n");
+					s = s.concat("\t\t\t<!-- TREATMENT TRANSACTION TYPE NAME: "+transactionTypeNameKey+": Column 1 and 2 -->\n");
+					s = s.concat("\t\t\t<td colspan=\"1\">\n");
+					s = s.concat("\t\t\t\t<div class=\"name\"><b><span>"+transactionTypeNameKey+"</span></b></div>\n");
+					s = s.concat("\t\t\t</td>\n");
+//						System.out.println("yearKey: "+yearKey);
+//						System.out.println(i+": "+inputMonthRowYearColumns[i+1]);					
+				}
+				//s = s.concat("\n");				
+			}				
+
+			if (s.contains("<!-- PT NAME and PT TRANSACTION COUNT Rows -->")) {				
+				for (String ptNameKey : sortedKeyset) {									
+					s = s.concat("\n");											
+					s = s.concat("\t\t  <!-- NAME "+ptNameKey+": Row -->\n");
+					s = s.concat("\t\t  <tr>\n");
+
+					s = s.concat("\t\t\t  <td colspan=\"1\">\n");
+					s = s.concat("\t\t\t\t  <div class=\"name\"><b><span>"+ptNameKey+"</span></b></div>\n");
+					s = s.concat("\t\t\t  </td>\n");
+
+					//start at 1, not 0, because 1 is for the PT Name
+					for(int i=1; i<OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS; i++) {
+						s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE "+physicalTherapistContainer.get(ptNameKey)[i]+": Columns -->\n");
+						s = s.concat("\t\t\t<!-- Column 1 -->\n");
+						s = s.concat("\t\t\t<td>\n");
+						s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");
+						s = s.concat("\t\t\t</td>\n");
+					}
+					s = s.concat("\t\t  </tr>\n");
+				}			
+			}
+							
+			writer.print(s + "\n");		
+		}
+		
+		writer.close();
+	}
+	
 	//added by Mike, 20190503; edited by Mike, 20190504
 	private static void processWriteOutputFileMonthlyStatistics(PrintWriter writer, int fileType) throws Exception {		
 //		File inputDataFile = new File(inputDataFilenameTreatmentMonthlyStatistics+".txt");	
