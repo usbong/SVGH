@@ -165,6 +165,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int INPUT_IN_PATIENT_PT_NAME_COLUMN_OFFSET = -2;
 	private static int ptNameOffset = 0;
 
+	//added by Mike, 20190518
+	private static final int INPUT_SWT_AND_LASER_PT_HMO_CASH_COLUMN = 19 - INPUT_NON_MASTER_LIST_OFFSET;
+
 	//TO-DO: -add: column for Consultation transactions, which have both Chief Complaint and Diagnosis
 	private static final int INPUT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;//6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
 
@@ -231,8 +234,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN = 2;
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN = 3;
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN = 4;
-	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SHOCK_WAVE_CASH_COLUMN = 5;
-	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SHOCK_WAVE_HMO_COLUMN = 6;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SWT_CASH_COLUMN = 5;
+	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_SWT_HMO_COLUMN = 6;
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_LASER_CASH_COLUMN = 7;
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_LASER_HMO_COLUMN = 8;
 	private static final int OUTPUT_PT_TRANSACTIONS_COUNT_1_COLUMN = 9;
@@ -1801,9 +1804,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
 						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN] = 1;
 					}
-					else if (inputFilename.toLowerCase().contains("SWT")) {
+					else if (inputFilename.toUpperCase().contains("SWT")) {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_SWT_HMO_COLUMN] = 1;
 					}
-					else if (inputFilename.toLowerCase().contains("LASER")) {
+					else if (inputFilename.toUpperCase().contains("LASER")) {
 					}
 					//default
 					else {
@@ -1816,9 +1820,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
 						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN] = 1;
 					}
-					else if (inputFilename.toLowerCase().contains("SWT")) {
+					else if (inputFilename.toUpperCase().contains("SWT")) {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_SWT_CASH_COLUMN] = 1;
 					}
-					else if (inputFilename.toLowerCase().contains("LASER")) {
+					else if (inputFilename.toUpperCase().contains("LASER")) {
 					}
 					//default
 					else {
@@ -1835,9 +1840,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
 						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN]++;
 					}
-					else if (inputFilename.toLowerCase().contains("SWT")) {
+					else if (inputFilename.toUpperCase().contains("SWT")) {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_SWT_HMO_COLUMN]++;
 					}
-					else if (inputFilename.toLowerCase().contains("LASER")) {
+					else if (inputFilename.toUpperCase().contains("LASER")) {
 					}
 					//default
 					else {
@@ -1850,9 +1856,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
 						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN]++;
 					}
-					else if (inputFilename.toLowerCase().contains("SWT")) {
+					else if (inputFilename.toUpperCase().contains("SWT")) {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_SWT_CASH_COLUMN]++;
 					}
-					else if (inputFilename.toLowerCase().contains("LASER")) {
+					else if (inputFilename.toUpperCase().contains("LASER")) {
 					}
 					//default
 					else {
@@ -2251,8 +2258,20 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 							continue;
 						}
 						else if ((inputFilename.toLowerCase().contains("laser")) ||
-							(inputFilename.toLowerCase().contains("swt"))) {
-							//TO-DO: -update: this
+								 (inputFilename.toLowerCase().contains("swt"))) {
+							//edited by Mike, 20190518
+							System.out.println("inputColumns.length: "+ inputColumns.length);
+							if (inputColumns.length==INPUT_SWT_AND_LASER_PT_HMO_CASH_COLUMN) {//].trim().equals("")) {
+								isHMO = false;							
+							}
+							else {
+								isHMO = true;																
+							}
+System.out.println("isHMO: "+isHMO);								
+							
+							processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);
+
+							continue;							
 						}
 
 
