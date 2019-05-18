@@ -161,6 +161,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 
 	//added by Mike, 20190516
 	private static final int INPUT_PT_NAME_COLUMN = 17 - INPUT_NON_MASTER_LIST_OFFSET;
+	//added by Mike, 20190518
+	private static final int INPUT_IN_PATIENT_PT_NAME_COLUMN_OFFSET = -2;
+	private static int ptNameOffset = 0;
 
 	//TO-DO: -add: column for Consultation transactions, which have both Chief Complaint and Diagnosis
 	private static final int INPUT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;//6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
@@ -1778,7 +1781,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//added by Mike, 20190516
 	private static void processPhysicalTherapyTransactionCount(HashMap<String, Integer[]> physicalTherapyContainer, String[] inputColumns, Boolean isHMO, String inputFilename) {		
 		if (!isConsultation) {
-			String inputPhysicalTherapist = inputColumns[INPUT_PT_NAME_COLUMN].trim().toUpperCase();
+			//edited by Mike, 20190518
+			String inputPhysicalTherapist = inputColumns[INPUT_PT_NAME_COLUMN+ptNameOffset].trim().toUpperCase();
 	
 //			System.out.println("inputPhysicalTherapist: "+inputPhysicalTherapist);
 	
@@ -1793,7 +1797,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 								
 				if (isHMO) {
 					//TO-DO: -update: this
-					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					//edited by Mike, 20190518
+					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN] = 1;
 					}
 					else if (inputFilename.toLowerCase().contains("SWT")) {
 					}
@@ -1806,7 +1812,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				}
 				else {
 					//TO-DO: -update: this
-					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					//edited by Mike, 20190518
+					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
+						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN] = 1;
 					}
 					else if (inputFilename.toLowerCase().contains("SWT")) {
 					}
@@ -1823,7 +1831,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			else {
 				if (isHMO) {
 					//TO-DO: -update: this
-					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					//edited by Mike, 20190518
+					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_HMO_COLUMN]++;
 					}
 					else if (inputFilename.toLowerCase().contains("SWT")) {
 					}
@@ -1836,7 +1846,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				}
 				else {
 					//TO-DO: -update: this
-					if (inputFilename.toLowerCase().contains("IN-PT")) {
+					//edited by Mike, 20190518
+					if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
+						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_IN_PATIENT_CASH_COLUMN]++;
 					}
 					else if (inputFilename.toLowerCase().contains("SWT")) {
 					}
@@ -2199,8 +2211,8 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 
 //					System.out.println("isHMO: "+isHMO);
 
-					//edited by Mike, 20190507
-					processMonthlyCount(dateContainer, inputColumns, i, false, isHMO); //isConsultation = false
+					//edited by Mike, 20190518
+//					processMonthlyCount(dateContainer, inputColumns, i, false, isHMO); //isConsultation = false
 /*
 					//added by Mike, 20181217
 					processHMOCount(hmoContainer, inputColumns, isConsultation); //edited by Mike, 20181219
@@ -2227,6 +2239,25 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 /*						//TO-DO: -update: this
 						processMedicalDoctorTransactionCount(referringDoctorContainer, inputColumns, isConsultation);						
 */						
+						
+						//added by Mike, 20190518
+						ptNameOffset=0;
+						if (inputFilename.toLowerCase().contains("in-patient"))
+						{
+							isHMO = false;
+							ptNameOffset = INPUT_IN_PATIENT_PT_NAME_COLUMN_OFFSET;
+							processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);
+
+							continue;
+						}
+						else if ((inputFilename.toLowerCase().contains("laser")) ||
+							(inputFilename.toLowerCase().contains("swt"))) {
+							//TO-DO: -update: this
+						}
+
+
+						//added by Mike, 20190518
+						processMonthlyCount(dateContainer, inputColumns, i, false, isHMO); //isConsultation = false
 
 						//added by Mike, 20190413
 						if (!isHMO) { //for Cash transactions
@@ -2241,7 +2272,7 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						processDiagnosedCasesClassificationCount(isHMO, inputColumns, isConsultation); 
 						
 						//added by Mike, 20190516
-						processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);
+						processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);						
 					}
 				}
 				else {
