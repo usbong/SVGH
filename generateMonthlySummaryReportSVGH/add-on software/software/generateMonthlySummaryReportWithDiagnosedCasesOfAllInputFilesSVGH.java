@@ -2259,15 +2259,15 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						}
 						else if ((inputFilename.toLowerCase().contains("laser")) ||
 								 (inputFilename.toLowerCase().contains("swt"))) {
-							//edited by Mike, 20190518
-							System.out.println("inputColumns.length: "+ inputColumns.length);
+//							//edited by Mike, 20190518
+//							System.out.println("inputColumns.length: "+ inputColumns.length);
 							if (inputColumns.length==INPUT_SWT_AND_LASER_PT_HMO_CASH_COLUMN) {//].trim().equals("")) {
 								isHMO = false;							
 							}
 							else {
 								isHMO = true;																
 							}
-System.out.println("isHMO: "+isHMO);								
+//System.out.println("isHMO: "+isHMO);								
 							
 							processPhysicalTherapyTransactionCount(physicalTherapistContainer, inputColumns, isHMO, inputFilename);
 
