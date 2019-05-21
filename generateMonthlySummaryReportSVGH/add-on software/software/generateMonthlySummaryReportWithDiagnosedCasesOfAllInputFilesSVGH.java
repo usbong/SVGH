@@ -531,7 +531,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 */
 		}
 		else {
-			System.out.println("\nThere is no Tab-delimited .txt input file in the \"input\\treatment\" folder.\n");
+			System.out.println("\n--\n\nThere is no Tab-delimited .txt input file in the \"input\\treatment\" folder to process at all.\n\n--\n");
 		}
 	}
 	
@@ -2078,10 +2078,10 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 	}
 
 	private static void processInputFiles(String[] args, boolean isPhaseOne) throws Exception {
-		
+/*		
 		System.out.println("isPhaseOne: "+isPhaseOne);
 		System.out.println("args.length: "+args.length);
-		
+*/		
 		
 		//edited by Mike, 20181030
 		for (int i=0; i<args.length; i++) {						
