@@ -79,6 +79,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//At present, this add-on software gets as input all .txt files inside the assets folder
 	private static String knownDiagnosedCasesListInputFilename = "KnownDiagnosedCasesList"; //without extension; default input file 
 
+	//added by Mike, 20190610
+	private static String plusAreaCountKeywordListInputFilename = "PlusAreaCountKeywordList"; //without extension; 
+	
 	//added by Mike, 20190414; edited by Mike, 20190513
 	private static String inputOutputTemplateFilenameTreatment = "assets\\templates\\generateMonthlySummaryReportOutputTemplateTreatmentSVGH";//without extension; default input file 
 	//Note that I have to use double backslash, i.e. "\\", to use "\" in the filename
@@ -192,6 +195,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	private static final int INPUT_KNOWN_DIAGNOSED_CASES_LIST_CLASSIFICATION_COLUMN = 0;
 	private static final int INPUT_KNOWN_DIAGNOSED_CASES_LIST_SUB_CLASSIFICATION_COLUMN = 1;
 
+	//added by Mike, 20190610
+	private static final int INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN = 0;	
 	
 /*	private static HashMap<String, double[]> referringDoctorContainer;	
 */
@@ -216,8 +221,10 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 
 	private static ArrayList<Integer> yearsContainerArrayList; //added by Mike, 20190503
 	private static ArrayList<String> treatmentTransactionTypeContainerArrayList; //added by Mike, 20190517
-
+	
 	private static Integer[] outputPTTransactionsCountColumnValuesArray; //added by Mike, 20190516
+
+	private static ArrayList<String[]> plusAreaCountKeywordContainerArrayList; //added by Mike, 20190610
 	
 	private static double[] columnValuesArray;
 	private static String[] dateValuesArray; //added by Mike, 20180412
@@ -419,7 +426,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		//For the St. Vincent General Hospital (SVGH) workbook, at present, there is no Consultation input worksheet.
 		consultationMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190504
 		procedureMonthlyStatisticsContainer = new HashMap<Integer, Integer[]>(); //added by Mike, 20190504
-		
+				
 		//added by Mike, 20181116
 		startDate = null; //properly set the month and year in the output file of each input file
 		dateValuesArray = new String[args.length]; //added by Mike, 20180412
@@ -443,11 +450,17 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 		treatmentTransactionTypeContainerArrayList.add(11, "3");
 		treatmentTransactionTypeContainerArrayList.add(12, "TOTAL");
 		
+		plusAreaCountKeywordContainerArrayList = new ArrayList<String[]>(); //added by Mike, 20190610
+
 		//added by Mike, 20190412
 		//PART/COMPONENT/MODULE/PHASE 1			
 		processKnownDiagnosedCasesInputFile(args);
 
+		//edited by Mike, 20190610
 		//PART/COMPONENT/MODULE/PHASE 2
+		processPlusAreaCountKeywordList(args);
+		
+		//PART/COMPONENT/MODULE/PHASE 3
 		processInputFiles(args, true);
 /*
 		//PART/COMPONENT/MODULE/PHASE 3		
@@ -1813,6 +1826,17 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					else {
 						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN] = 1;
 					}
+					
+					//added by Mike, 20190610
+					//TO-DO: -add: count plus areas
+/*					
+					
+					inputColumns[INPUT_DIAGNOSIS_COLUMN]
+					
+					if (inputFilename.toUpperCase().contains("LASER")) {
+					}
+					outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_HMO_COLUMN] = 1;
+*/					
 				}
 				else {
 					//edited by Mike, 20190519
@@ -1868,6 +1892,61 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				}
 			}			
 		}
+	}
+	
+	//added by Mike, 20190610
+	private static void processPlusAreaCountKeywordList(String[] args) throws Exception {
+		for (int i=0; i<args.length; i++) {						
+			inputFilename = args[i].replaceAll(".txt","");			
+			File f = new File(inputFilename+".txt");
+
+			System.out.println("inputFilename: " + inputFilename);
+			
+			//added by Mike, 20190207
+			if (inputFilename.contains("*")) {
+				continue;
+			}
+			
+			if (!inputFilename.toLowerCase().contains("assets")) {
+				continue;
+			}					
+			
+			//added by Mike, 20190610
+			if (!inputFilename.toLowerCase().contains(plusAreaCountKeywordListInputFilename.toLowerCase())) {
+				continue;
+			}
+									
+			Scanner sc = new Scanner(new FileInputStream(f));				
+		
+			String s;		
+			s=sc.nextLine(); //skip the first row, which is the input file's table headers
+	
+			if (isInDebugMode) {
+				rowCount=0;
+			}
+						
+			//count/compute the number-based values of inputColumns 
+			while (sc.hasNextLine()) {
+				s=sc.nextLine();
+				
+				//if the row is blank
+				if (s.trim().equals("")) {
+					continue;
+				}
+				
+				String[] inputColumns = s.split("\t");					
+					
+				String[] plusAreaCountKeywordContainerArrayListValue = {inputColumns[INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN].toUpperCase()};
+				plusAreaCountKeywordContainerArrayList.add(plusAreaCountKeywordContainerArrayListValue);
+				
+				System.out.println("inputColumns[INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN].toUpperCase(): "+inputColumns[INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN].toUpperCase());
+				
+				if (isInDebugMode) {
+					rowCount++;
+					System.out.println("rowCount: "+rowCount);
+				}
+			}		
+		}		
 	}
 	
 	//added by Mike, 20181220
@@ -1989,7 +2068,12 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			
 			if (!inputFilename.toLowerCase().contains("assets")) {
 				continue;
-			}					
+			}
+
+			//added by Mike, 20190610
+			if (!inputFilename.toLowerCase().contains(knownDiagnosedCasesListInputFilename.toLowerCase())) {
+				continue;
+			}			
 									
 			Scanner sc = new Scanner(new FileInputStream(f));				
 		
