@@ -174,6 +174,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	//TO-DO: -add: column for Consultation transactions, which have both Chief Complaint and Diagnosis
 	private static final int INPUT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET;//6-INPUT_NON_MASTER_LIST_OFFSET; //added by Mike, 20190413
 
+	//added by Mike, 20190611
+	private static final int INPUT_IN_PATIENT_DIAGNOSIS_COLUMN = 15-INPUT_NON_MASTER_LIST_OFFSET -2; //COLUMN M, instead of COLUMN O
+	
 	//edited by Mike, 20190425
 	private static final int INPUT_CONSULTATION_PROCEDURE_COLUMN = 2-INPUT_NON_MASTER_LIST_OFFSET;
 //	private static final int INPUT_CONSULTATION_MEDICAL_DOCTOR_COLUMN = 16-INPUT_NON_MASTER_LIST_OFFSET;
@@ -1802,6 +1805,56 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 	
 //			System.out.println("inputPhysicalTherapist: "+inputPhysicalTherapist);
 	
+			boolean hasPlusAreaKeywords=false;
+	
+			//added by Mike, 20190610
+			int plusAreaCountTotal = 0;
+			for (int h=0; h<plusAreaCountKeywordContainerArrayList.size(); h++) {
+				//TO-DO: -update: this to process each word separated by a space for both the input and the keyword list
+/*					if (inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().contains(plusAreaCountKeywordContainerArrayList.get(h)[0])) {
+					plusAreaCountTotal++;
+				}
+*/				
+
+				//edited by Mike, 20190611
+				String[] inputStringArray;
+				if (inputFilename.toUpperCase().contains("IN-PATIENT")) {
+					inputStringArray = inputColumns[INPUT_IN_PATIENT_DIAGNOSIS_COLUMN].toUpperCase().split(" ");	
+				}
+				else {
+					inputStringArray = inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().split(" ");
+				}
+
+				//String[] inputStringArray = inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().split(" ");
+				String[] s = plusAreaCountKeywordContainerArrayList.get(h)[0].split(" ");
+				//String s = plusAreaCountKeywordContainerArrayList.get(h)[0];
+				
+				for(int i=0; i<s.length; i++) {			
+					int k;
+					for(k=0; k<inputStringArray.length; k++) {								
+						if (inputStringArray[k].trim().toUpperCase().equals(s[i].trim().toUpperCase())) {
+//						if (inputStringArray[k].trim().toUpperCase().equals(s.trim().toUpperCase())) {
+							hasPlusAreaKeywords=true;
+							//plusAreaCountTotal++;
+							break;
+						}
+					}
+
+					if (k==inputStringArray.length) {
+						hasPlusAreaKeywords=false;
+						//hasKnownDiagnosedCaseKeywords=false;
+						break;
+					}
+				}			
+//				if (hasKnownDiagnosedCaseKeywords) {
+				if (hasPlusAreaKeywords) {	
+//				if (plusAreaCountTotal>0) {
+					plusAreaCountTotal++;
+//					break;
+					continue;
+				}
+			}
+	
 			if (!physicalTherapistContainer.containsKey(inputPhysicalTherapist)) {
 				outputPTTransactionsCountColumnValuesArray = new Integer[OUTPUT_PT_TRANSACTIONS_COUNT_TOTAL_COLUMNS];
 
@@ -1843,16 +1896,38 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 						outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_CASH_COLUMN] = 1;
 					}
 				}
-				
+/*				
 				//added by Mike, 20190610
 				int plusAreaCountTotal = 0;
-				for (int k=0; k<plusAreaCountKeywordContainerArrayList.size(); k++) {
+				for (int h=0; h<plusAreaCountKeywordContainerArrayList.size(); h++) {
 					//TO-DO: -update: this to process each word separated by a space for both the input and the keyword list
-					if (inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().contains(plusAreaCountKeywordContainerArrayList.get(k)[0])) {
-						plusAreaCountTotal++;
+//					if (inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().contains(plusAreaCountKeywordContainerArrayList.get(h)[0])) {
+//						plusAreaCountTotal++;
+//					}
+				
+					String[] inputStringArray = inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().split(" ");	String[] s = plusAreaCountKeywordContainerArrayList.get(h)[0].split(" ");
+					
+					for(int i=0; i<s.length; i++) {			
+						int k;
+						for(k=0; k<inputStringArray.length; k++) {								
+							if (inputStringArray[k].trim().toUpperCase().equals(s[i].trim().toUpperCase())) {
+								//hasKnownDiagnosedCaseKeywords=true;
+								plusAreaCountTotal++;
+								break;
+							}
+						}
+
+						if (k==inputStringArray.length) {
+							//hasKnownDiagnosedCaseKeywords=false;
+							break;
+						}
+					}			
+	//				if (hasKnownDiagnosedCaseKeywords) {
+					if (plusAreaCountTotal>0) {
+						break;
 					}
 				}
-				
+*/							
 				if (plusAreaCountTotal==1) {
 					outputPTTransactionsCountColumnValuesArray[OUTPUT_PT_TRANSACTIONS_COUNT_1_COLUMN] = 1;
 				}
@@ -1899,7 +1974,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 						physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_CASH_COLUMN]++;
 					}
 				}
-				
+/*				
 				//added by Mike, 20190610
 				int plusAreaCountTotal = 0;
 				for (int k=0; k<plusAreaCountKeywordContainerArrayList.size(); k++) {
@@ -1908,7 +1983,7 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 						plusAreaCountTotal++;
 					}
 				}
-				
+*/				
 				if (plusAreaCountTotal==1) {
 					physicalTherapistContainer.get(inputPhysicalTherapist)[OUTPUT_PT_TRANSACTIONS_COUNT_1_COLUMN]++;
 				}
