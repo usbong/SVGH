@@ -2720,7 +2720,19 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 						s = s.concat("\t\t\t<!-- Column TRANSACTION TYPE "+physicalTherapistContainer.get(ptNameKey)[i]+": Columns -->\n");
 						s = s.concat("\t\t\t<!-- Column 1 -->\n");
 						s = s.concat("\t\t\t<td>\n");
-						s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");
+						
+						//edited by Mike, 20190620				
+//						s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");						
+						if (i==OUTPUT_PT_TRANSACTIONS_COUNT_2_COLUMN) {
+							s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]*2+"</span></b>\n");
+						}
+						else if (i==OUTPUT_PT_TRANSACTIONS_COUNT_3_COLUMN) {
+							s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]*3+"</span></b>\n");
+						}
+						else {
+							s = s.concat("\t\t\t\t<b><span>"+physicalTherapistContainer.get(ptNameKey)[i]+"</span></b>\n");
+						}					
+						
 						s = s.concat("\t\t\t</td>\n");
 
 						//added by Mike, 20190517
