@@ -1,18 +1,24 @@
 Keyword
 (B)
+B
 Bilateral
 And
 &
 ;
+","
 CVA
+CVA/Parkinson's Disease
+CVA/Parkinson Disease
 CP
 Decon
+Deconditioning
 Deconditioning Syndrome
 Developmental Delay
 Global Developmental Delay
 CVD
 urgency/CVD
 Parkinson’s Disease
+Parkinson Disease
 SCI
 Guiilaine Barre Syndrome (GBS)
 Transverse Myelitis
@@ -20,3 +26,4 @@ Meningitis
 Polyneuropathy
 Meniere’s Disease
 Traumatic Brain Injury (TBI)
+cervicalradiculopathy/Trigger
