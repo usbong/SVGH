@@ -17,13 +17,13 @@ Developmental Delay
 Global Developmental Delay
 CVD
 urgency/CVD
-Parkinson’s Disease
+Parkinson's Disease
 Parkinson Disease
 SCI
 Guiilaine Barre Syndrome (GBS)
 Transverse Myelitis
 Meningitis
 Polyneuropathy
-Meniere’s Disease
+Meniere's Disease
 Traumatic Brain Injury (TBI)
 cervicalradiculopathy/Trigger
