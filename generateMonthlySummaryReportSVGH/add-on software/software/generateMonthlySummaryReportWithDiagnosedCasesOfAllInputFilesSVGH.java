@@ -1831,13 +1831,53 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				
 				for(int i=0; i<s.length; i++) {			
 					int k;
-					for(k=0; k<inputStringArray.length; k++) {								
-						if (inputStringArray[k].trim().toUpperCase().equals(s[i].trim().toUpperCase())) {
-//						if (inputStringArray[k].trim().toUpperCase().equals(s.trim().toUpperCase())) {
-							hasPlusAreaKeywords=true;
-							//plusAreaCountTotal++;
-							break;
+					for(k=0; k<inputStringArray.length; k++) {				
+						
+						//edited by Mike, 20190624
+						String plusAreaKeyword = s[i].trim().toUpperCase();
+
+//						System.out.println("plusAreaKeyword: "+plusAreaKeyword);							
+						
+						if (plusAreaKeyword.equals(",")) {
+//						System.out.println(">>plusAreaKeyword: "+plusAreaKeyword);							
+
+//							System.out.println(",");							
+//							System.out.println(""+inputStringArray[k].trim().toUpperCase());														
+							if (inputStringArray[k].trim().toUpperCase().replace("\"","").contains(",")) {
+								hasPlusAreaKeywords=true;
+	
+							System.out.println(",");							
+							System.out.println(""+inputStringArray[k].trim().toUpperCase().replace("\"",""));
+							
+								System.out.println("hasPlusAreaKeywords"+hasPlusAreaKeywords);							
+
+								break;
+							}
 						}
+						else if (plusAreaKeyword.equals(";")) {
+							if (inputStringArray[k].trim().toUpperCase().replace("\"","").contains(";")) {
+								hasPlusAreaKeywords=true;
+								break;
+							}
+						}
+						else if (plusAreaKeyword.equals("B")) {
+							if (inputStringArray[k].trim().toUpperCase().replace("\"","").equals("B")) {
+								if (k+1 < inputStringArray.length) {
+									if (!inputStringArray[k+1].trim().toUpperCase().replace("\"","").equals("LB")) {
+										hasPlusAreaKeywords=false;
+										break;
+									}
+								}
+								hasPlusAreaKeywords=true;
+								break;
+							}
+						}
+						else {
+							if (inputStringArray[k].trim().toUpperCase().replace("\"","").equals(s[i].trim().toUpperCase().replace("\"",""))) {
+								hasPlusAreaKeywords=true;
+								break;
+							}
+						}					
 					}
 
 					if (k==inputStringArray.length) {
@@ -2039,7 +2079,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 				
 				String[] inputColumns = s.split("\t");					
 					
-				String[] plusAreaCountKeywordContainerArrayListValue = {inputColumns[INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN].toUpperCase()};
+				//edited by Mike, 20190625
+				String[] plusAreaCountKeywordContainerArrayListValue = {inputColumns[INPUT_PLUS_AREA_COUNT_KEYWORD_LIST_COLUMN].toUpperCase().replace("\"","")};
 	
 				plusAreaCountKeywordContainerArrayList.add(plusAreaCountKeywordContainerArrayListValue);
 /*				
