@@ -1810,7 +1810,6 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 			//added by Mike, 20190610
 			int plusAreaCountTotal = 0;
 			for (int h=0; h<plusAreaCountKeywordContainerArrayList.size(); h++) {
-				//TO-DO: -update: this to process each word separated by a space for both the input and the keyword list
 /*					if (inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase().contains(plusAreaCountKeywordContainerArrayList.get(h)[0])) {
 					plusAreaCountTotal++;
 				}
@@ -1845,11 +1844,9 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 //							System.out.println(""+inputStringArray[k].trim().toUpperCase());														
 							if (inputStringArray[k].trim().toUpperCase().replace("\"","").contains(",")) {
 								hasPlusAreaKeywords=true;
-	
-							System.out.println(",");							
-							System.out.println(""+inputStringArray[k].trim().toUpperCase().replace("\"",""));
-							
-								System.out.println("hasPlusAreaKeywords"+hasPlusAreaKeywords);							
+//								System.out.println(",");							
+//								System.out.println(""+inputStringArray[k].trim().toUpperCase().replace("\"",""));						
+//								System.out.println("hasPlusAreaKeywords"+hasPlusAreaKeywords);							
 
 								break;
 							}
@@ -1874,6 +1871,17 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 						}
 						else {
 							if (inputStringArray[k].trim().toUpperCase().replace("\"","").equals(s[i].trim().toUpperCase().replace("\"",""))) {
+								
+								if (inputPhysicalTherapist.equals("MARELLA")) {
+									String keyword = s[i].trim().toUpperCase().replace("\"","");
+									String inputDiagnosis = inputColumns[INPUT_DIAGNOSIS_COLUMN].toUpperCase();
+									
+									System.out.println("inputDiagnosis: "+inputDiagnosis);
+
+									System.out.println("keyword: "+keyword);
+								}
+
+								
 								hasPlusAreaKeywords=true;
 								break;
 							}
@@ -1887,8 +1895,8 @@ public class generateMonthlySummaryReportWithDiagnosedCasesOfAllInputFilesSVGH {
 					}
 				}			
 //				if (hasKnownDiagnosedCaseKeywords) {
-				if (hasPlusAreaKeywords) {	
-//				if (plusAreaCountTotal>0) {
+				if (hasPlusAreaKeywords) {					
+//				if (plusAreaCountTotal>0) {	
 					plusAreaCountTotal++;
 //					break;
 					continue;
