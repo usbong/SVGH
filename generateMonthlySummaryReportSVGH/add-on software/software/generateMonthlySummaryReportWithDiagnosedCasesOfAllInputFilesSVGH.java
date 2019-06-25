@@ -3814,9 +3814,10 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 //		classificationContainerPerMedicalDoctor = new HashMap<String, HashMap<String, double[]>>();								
 	}
 
-	//added by Mike, 20190413; edited by Mike, 20190514
+	//added by Mike, 20190413; edited by Mike, 20190625
 	private static void processDiagnosedCasesCount(HashMap<String, Integer> diagnosedCasesContainer, String[] inputColumns, boolean isConsultation) {
-			String diagnosedCaseName = inputColumns[INPUT_DIAGNOSIS_COLUMN].trim().toUpperCase();
+			//edited by Mike, 20190625
+			String diagnosedCaseName = inputColumns[INPUT_DIAGNOSIS_COLUMN].trim().toUpperCase().replace("\"","");
 			
 			if (!isConsultation) {											
 				if (inputColumns[INPUT_NEW_OLD_PATIENT_COLUMN].trim().toLowerCase().contains("new")) {
@@ -3920,9 +3921,11 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 			
 				hasKnownDiagnosedCaseKeywords=false;
 //				subClassification = knownDiagnosedCasesKey; 
-				subClassification = knownDiagnosedCasesContainerArrayList.get(h)[0]; 
+				//edited by Mike, 20190625
+				subClassification = knownDiagnosedCasesContainerArrayList.get(h)[0].replace("\"",""); 
 //				classification = knownDiagnosedCasesContainer.get(knownDiagnosedCasesKey);
-				classification = knownDiagnosedCasesContainerArrayList.get(h)[1];
+				//edited by Mike, 20190625
+				classification = knownDiagnosedCasesContainerArrayList.get(h)[1].replace("\"","");
 /*				
 				if (inputString.toLowerCase().contains("trigger")) {					
 					System.out.println(">>>>>>> inputString: "+inputString);
@@ -3947,7 +3950,8 @@ System.out.println("medical doctor: "+medicalDoctorKey);
 //					for(k=inputStringArray.length-1; k>=0; k--) {		
 //						System.out.println(">> "+inputStringArray[k]);
 						
-						if (inputStringArray[k].trim().toUpperCase().equals(s[i].trim().toUpperCase())) {
+						//edited by Mike, 20190625
+						if (inputStringArray[k].trim().toUpperCase().replace("\"","").equals(s[i].trim().toUpperCase())) {
 							hasKnownDiagnosedCaseKeywords=true;
 							break;
 						}
