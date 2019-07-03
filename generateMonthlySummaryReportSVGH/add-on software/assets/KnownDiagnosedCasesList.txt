@@ -138,3 +138,6 @@ Parkinson's Disease	Parkinson's Disease
 GBS	GBS
 TMJ	TMJ Dysfunction
 Deconditioning Syndrome	Deconditioning Syndrome
+Adcap/FS	Adcap/FS
+Neuro	Neuro
+Myalgia	Myalgia
