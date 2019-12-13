@@ -164,29 +164,14 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 	public static void main ( String[] args ) throws Exception
 	{			
 		makeFilePath("output"); //"output" is the folder where I've instructed the add-on software/application to store the output file			
-		PrintWriter consultationWriter = new PrintWriter("output/UnpaidHMOSummaryReportOutputConsultation.txt", "UTF-8");			
-		PrintWriter treatmentWriter = new PrintWriter("output/UnpaidHMOSummaryReportOutputTreatment.txt", "UTF-8");			
 
-		/*referringDoctorContainer = new HashMap<String, double[]>();
-		*/
-		
-		transactionDateContainer = new ArrayList<String[]>(); //added by Mike, 20190119
-		
-		dateContainer = new HashMap<Integer, double[]>();
-		hmoContainer = new HashMap<String, double[]>();
-		nonHmoContainer = new HashMap<String, double[]>();
-		referringDoctorContainer = new HashMap<String, double[]>();
-//		medicalDoctorContainer = new HashMap<String, double[]>();
-		classificationContainerPerMedicalDoctor = new HashMap<String, HashMap<String, double[]>>();				
-				
-		//added by Mike, 20181116
-		startDate = null; //properly set the month and year in the output file of each input file
-		dateValuesArray = new String[args.length]; //added by Mike, 20180412
-		dateValuesArrayInt = new int[args.length]; //added by Mike, 20180412
-		//dateValuesArrayInt = new ArrayList<int>(); //edited by Mike, 20181221
+		//update this
+		PrintWriter outputWriter = new PrintWriter("output/extractedOutput.txt", "UTF-8");			
 
-		//PART/COMPONENT/MODULE/PHASE 1
 		processInputFiles(args, true);
+		
+		//PART/COMPONENT/MODULE/PHASE 1
+		//processInputFiles(args, true);
 
 		//PART/COMPONENT/MODULE/PHASE 2		
 /*		setClassificationContainerPerMedicalDoctor(classificationContainerPerMedicalDoctor);
@@ -198,6 +183,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 		 * OUTPUT
 		 * --------------------------------------------------------------------
 		*/
+/*		
 		//added by Mike, 20181118
 		consultationWriter.print("Unpaid HMO Summary Report (CONSULTATION)\n");
 		
@@ -248,6 +234,9 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 		
 		consultationWriter.close();		
 		treatmentWriter.close();
+*/
+
+		outputWriter.close();
 	}
 	
 	private static String convertDateToMonthYearInWords(int date) {
@@ -340,7 +329,41 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 		}
 	}
 
+	//added by Mike, 20191213
 	private static void processInputFiles(String[] args, boolean isPhaseOne) throws Exception {
+		for (int i=0; i<args.length; i++) {						
+			//added by Mike, 20181030
+			inputFilename = args[i].replaceAll(".txt","");			
+			File f = new File(inputFilename+".txt");
+			
+			Scanner sc = new Scanner(new FileInputStream(f));				
+		
+			String s;		
+			s=sc.nextLine(); //skip the first row, which is the input file's table headers
+	
+			if (inDebugMode) {
+				rowCount=0;
+			}
+						
+			//count/compute the number-based values of inputColumns 
+			while (sc.hasNextLine()) {
+				s=sc.nextLine();
+				
+				//if the row is blank
+				if (s.trim().equals("")) {
+					continue;
+				}
+				
+				System.out.println("rowCount: " + rowCount + ": " + s);
+				
+				String[] inputColumns = s.split("\t");		
+				
+				rowCount++;
+			}
+		}
+	}
+
+	private static void processInputFilesSLHCC(String[] args, boolean isPhaseOne) throws Exception {
 		//edited by Mike, 20181030
 		for (int i=0; i<args.length; i++) {						
 			//added by Mike, 20181030
