@@ -337,6 +337,9 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 			File f = new File(inputFilename+".txt");
 			
 			Scanner sc = new Scanner(new FileInputStream(f));				
+
+			//added by Mike, 20191214
+			boolean hasIdentifiedStartRow = false;
 		
 			String s;		
 			s=sc.nextLine(); //skip the first row, which is the input file's table headers
@@ -354,6 +357,15 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 					continue;
 				}
 				
+				if (!hasIdentifiedStartRow) {
+					if (s.trim().contains("(1)")) {
+						hasIdentifiedStartRow = true;						
+					}
+					else {
+						continue;
+					}					
+				}
+												
 				System.out.println("rowCount: " + rowCount + ": " + s);
 				
 				String[] inputColumns = s.split("\t");		
