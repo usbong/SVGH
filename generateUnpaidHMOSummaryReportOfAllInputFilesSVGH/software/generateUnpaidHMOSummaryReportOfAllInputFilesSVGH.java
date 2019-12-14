@@ -148,6 +148,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 	
 	private static DecimalFormat df = new DecimalFormat("0.00"); //added by Mike, 20181105
 	private static int rowCount; //added by Mike, 20181105
+	private static int columnCount; //added by Mike, 20191214
 				
 	private static int totalCountForAllReferringDoctors;
 	private static double totalNetTreatmentFeeForAllReferringDoctors;
@@ -336,6 +337,9 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 			inputFilename = args[i].replaceAll(".txt","");			
 			File f = new File(inputFilename+".txt");
 			
+			//TO-DO: -add: other HMO classifications
+			PrintWriter outputWriter = new PrintWriter("output/maxicare.txt", "UTF-8");			
+			
 			Scanner sc = new Scanner(new FileInputStream(f));				
 
 			//added by Mike, 20191214
@@ -344,10 +348,14 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 			String s;		
 			s=sc.nextLine(); //skip the first row, which is the input file's table headers
 	
-			if (inDebugMode) {
+//			if (inDebugMode) {
 				rowCount=0;
-			}
-						
+//			}
+				columnCount=0;
+				
+			int transactionCount = columnCount+1;
+			//outputWriter.write(transactionCount+"\t");
+
 			//count/compute the number-based values of inputColumns 
 			while (sc.hasNextLine()) {
 				s=sc.nextLine();
@@ -355,8 +363,10 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 				//if the row is blank
 				if (s.trim().equals("")) {
 					continue;
-				}
-				
+				}							
+								
+				//TO-DO: -add: more HMO classifications
+				//Maxicare HMO				
 				if (!hasIdentifiedStartRow) {
 					if (s.trim().contains("(1)")) {
 						hasIdentifiedStartRow = true;						
@@ -365,10 +375,44 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 						continue;
 					}					
 				}
-												
-				System.out.println("rowCount: " + rowCount + ": " + s);
 				
-				String[] inputColumns = s.split("\t");		
+				//if the 1st character is capital "Q" or small "q"
+				if ((s.charAt(0) == 'Q') || (s.charAt(0) == 'q')) {
+					continue;
+				}
+				else if ((s.charAt(0) == 'B') && (s.charAt(1) == 'T')) {					
+					//12 columns + 1 column (row count)
+					if (columnCount<12) {
+						if (columnCount==0) {
+//							outputWriter.write("\n"+transactionCount+"\t");
+						}
+
+						String[] sInputTextPart1 = s.split("\\)");		
+						//System.out.println("sInputTextPart1: " + sInputTextPart1[0]);				
+												
+						
+						String[] sInputTextPart2 = sInputTextPart1[0].split("\\(");		
+						//System.out.println("sInputTextPart2: " + sInputTextPart2[1]);				
+
+						outputWriter.write(sInputTextPart2[1]+"\t");
+						columnCount++;
+						
+						if (columnCount==12) {
+							transactionCount++;
+							columnCount=0;	
+							outputWriter.write("\n");
+						}
+					}
+/*					else {
+						transactionCount++;
+						columnCount=0;	
+						outputWriter.write("\n");
+					}
+*/					
+				}
+				
+				System.out.println("rowCount: " + rowCount + ": " + s);				
+				//String[] inputColumns = s.split("\t");		
 				
 				rowCount++;
 			}
