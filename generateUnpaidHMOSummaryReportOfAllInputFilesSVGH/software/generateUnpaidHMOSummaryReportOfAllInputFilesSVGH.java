@@ -342,8 +342,8 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 			
 			Scanner sc = new Scanner(new FileInputStream(f));				
 
-			//added by Mike, 20191214
-			boolean hasIdentifiedStartRow = false;
+			boolean hasIdentifiedStartRow = false; //added by Mike, 20191214
+			boolean hasWrittenColumnValue = false; //added by Mike, 20191216
 		
 			String s;		
 			s=sc.nextLine(); //skip the first row, which is the input file's table headers
@@ -378,9 +378,15 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 				
 				//if the 1st character is capital "Q" or small "q"
 				if ((s.charAt(0) == 'Q') || (s.charAt(0) == 'q')) {
+					//added by Mike, 20191216
+					if (hasWrittenColumnValue) {
+						outputWriter.write("\t");
+						hasWrittenColumnValue=false;						
+					}
+	
 					continue;
 				}
-				else if ((s.charAt(0) == 'B') && (s.charAt(1) == 'T')) {					
+				else if ((s.charAt(0) == 'B') && (s.charAt(1) == 'T')) {
 					//12 columns + 1 column (row count)
 					if (columnCount<12) {
 						if (columnCount==0) {
@@ -394,13 +400,24 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 						String[] sInputTextPart2 = sInputTextPart1[0].split("\\(");		
 						//System.out.println("sInputTextPart2: " + sInputTextPart2[1]);				
 
-						outputWriter.write(sInputTextPart2[1]+"\t");
+						//edited by Mike, 20191216
+						//outputWriter.write(sInputTextPart2[1]+"\t");
+						outputWriter.write(sInputTextPart2[1]);
 						columnCount++;
 						
 						if (columnCount==12) {
 							transactionCount++;
 							columnCount=0;	
 							outputWriter.write("\n");
+							hasWrittenColumnValue=false;
+						}
+						else {
+							//added by Mike, 20191216
+							if (hasWrittenColumnValue) {
+								outputWriter.write(" ");								
+								columnCount--;
+							}
+							hasWrittenColumnValue=true;
 						}
 					}
 /*					else {
