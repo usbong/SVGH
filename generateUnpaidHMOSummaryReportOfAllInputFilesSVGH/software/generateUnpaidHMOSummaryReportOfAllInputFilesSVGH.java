@@ -167,7 +167,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 		makeFilePath("output"); //"output" is the folder where I've instructed the add-on software/application to store the output file			
 
 		//update this
-		PrintWriter outputWriter = new PrintWriter("output/extractedOutput.txt", "UTF-8");			
+//		PrintWriter outputWriter = new PrintWriter("output/extractedOutput.txt", "UTF-8");			
 
 		processInputFiles(args, true);
 		
@@ -237,7 +237,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 		treatmentWriter.close();
 */
 
-		outputWriter.close();
+//		outputWriter.close();
 	}
 	
 	private static String convertDateToMonthYearInWords(int date) {
@@ -344,6 +344,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 
 			boolean hasIdentifiedStartRow = false; //added by Mike, 20191214
 			boolean hasWrittenColumnValue = false; //added by Mike, 20191216
+			boolean isSubTotalRow = false; //added by Mike, 20191218
 		
 			String s;		
 			s=sc.nextLine(); //skip the first row, which is the input file's table headers
@@ -386,38 +387,68 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 	
 					continue;
 				}
-				else if ((s.charAt(0) == 'B') && (s.charAt(1) == 'T')) {
+				else if ((s.charAt(0) == 'B') && (s.charAt(1) == 'T')) {										
 					//12 columns + 1 column (row count)
 					if (columnCount<12) {
+/*
 						if (columnCount==0) {
 //							outputWriter.write("\n"+transactionCount+"\t");
 						}
-
+*/						
 						String[] sInputTextPart1 = s.split("\\)");		
-						//System.out.println("sInputTextPart1: " + sInputTextPart1[0]);				
-												
-						
+						System.out.println("sInputTextPart1: " + sInputTextPart1[0]);				
+																	
 						String[] sInputTextPart2 = sInputTextPart1[0].split("\\(");		
-						//System.out.println("sInputTextPart2: " + sInputTextPart2[1]);				
+						System.out.println("sInputTextPart2: " + sInputTextPart2[1]);				
 
-						//edited by Mike, 20191216
-						//outputWriter.write(sInputTextPart2[1]+"\t");
-						outputWriter.write(sInputTextPart2[1]);
-						columnCount++;
-						
-						if (columnCount==12) {
-							transactionCount++;
-							columnCount=0;	
-							outputWriter.write("\n");
-							hasWrittenColumnValue=false;
+						//added by Mike, 20191218
+						if (sInputTextPart2[1].equals("Sub Total")) {
+							isSubTotalRow=true;
 						}
-						else {
-							//added by Mike, 20191216
-							if (hasWrittenColumnValue) {
-								outputWriter.write(" ");								
-								columnCount--;
+						//added by Mike, 20191219
+						if (sInputTextPart2[1].trim().equals("NOTE")) {
+							outputWriter.close();
+							return;
+						} 
+
+						columnCount++;
+
+						System.out.println("columnCount: " + columnCount);				
+
+						if (isSubTotalRow) {
+							System.out.println("isSubTotalRow");				
+
+							if (columnCount>5) {
+								//transactionCount++;
+								columnCount=0;	
+								//outputWriter.write("\n");
+								//hasWrittenColumnValue=false;
+								
+								isSubTotalRow=false;
+							}							
+						}
+						else {							
+							System.out.println("NOT isSubTotalRow");				
+
+							//edited by Mike, 20191216
+							//outputWriter.write(sInputTextPart2[1]+"\t");
+							outputWriter.write(sInputTextPart2[1]);						
+							//columnCount++;
+							
+							if (columnCount==12) {
+								transactionCount++;
+								columnCount=0;	
+								outputWriter.write("\n");
+								hasWrittenColumnValue=false;
 							}
-							hasWrittenColumnValue=true;
+							else {
+								//added by Mike, 20191216
+								if (hasWrittenColumnValue) {
+									outputWriter.write(" ");								
+									columnCount--;
+								}
+								hasWrittenColumnValue=true;
+							}
 						}
 					}
 /*					else {
@@ -428,7 +459,7 @@ public class generateUnpaidHMOSummaryReportOfAllInputFilesSVGH {
 */					
 				}
 				
-				System.out.println("rowCount: " + rowCount + ": " + s);				
+//				System.out.println("rowCount: " + rowCount + ": " + s);				
 				//String[] inputColumns = s.split("\t");		
 				
 				rowCount++;
