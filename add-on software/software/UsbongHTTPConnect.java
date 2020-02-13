@@ -83,7 +83,7 @@ import java.text.SimpleDateFormat; //added by Mike, 20200213
 //location: St. Vincent General Hospital: Orthopedic and Physical Rehabilitation Unit
 public class UsbongHTTPConnect { 
 	//added by Mike, 20190811
-	private static boolean isInDebugMode = true;
+	private static boolean isInDebugMode = false; //true;
 
 	//added by Mike, 20190814; edited by Mike, 20190917
 	private static boolean isForUpload = true;
@@ -194,6 +194,9 @@ public class UsbongHTTPConnect {
 
 		//added by Mike, 20190812
 		int transactionCount = 0; //start from zero
+		
+		//added by Mike, 20200213
+		int iLastColumnCount = 0;
 
 		for (int i=0; i<args.length; i++) {									
 			inputFilename = args[i].replaceAll(".txt","");			
@@ -230,10 +233,14 @@ public class UsbongHTTPConnect {
 */
 
 
+
 			//TO-DO: -upload: only transactions for the day
 			//output: 02/01/2020
 			String dateTimeStamp = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
 			System.out.println(">>" + dateTimeStamp);
+
+			json.put("dateTimeStamp", dateTimeStamp);
+			json.put("inputFilename", inputFilename);    
 
 /*	
 			if (isInDebugMode) {
@@ -248,9 +255,20 @@ public class UsbongHTTPConnect {
 				//s=sc.nextLine();
 				s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
 				
-				System.out.println("s: " + s);
+//				System.out.println("s: " + s);
+
+				String[] inputColumns = s.split("\t");
 
 				if (rowCount==1) { //do not include table header
+				
+					//identify last column
+					int iColumnCount = 1; //start at 1 given worksheet from MS EXCEL
+					while (iColumnCount <= inputColumns.length) {
+						iColumnCount++;
+					}
+					
+					iLastColumnCount = iColumnCount-1;
+				
 					rowCount++;
 					continue;
 				}
@@ -260,7 +278,18 @@ public class UsbongHTTPConnect {
 					continue;
 				}
 				
-				String[] inputColumns = s.split("\t");
+//				String[] inputColumns = s.split("\t");
+				
+				if (inputColumns[0].equals(dateTimeStamp)) {
+					JSONObject transactionInJSONFormat = new JSONObject();
+//					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
+
+					transactionInJSONFormat.put("value", s); 		
+
+					json.put("i"+transactionCount, transactionInJSONFormat);    						
+
+					transactionCount++;
+				}
 				
 				//System.out.println(s);
 				//json.put("myKey", "myValue");    
@@ -275,8 +304,9 @@ public class UsbongHTTPConnect {
 
 				//edited by Mike, 20190813
 				json.put("i"+transactionCount, transactionInJSONFormat);    	
-*/				
+
 				transactionCount++;
+*/				
 
 				if (isInDebugMode) {
 					rowCount++;
