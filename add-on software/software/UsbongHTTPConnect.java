@@ -131,7 +131,13 @@ public class UsbongHTTPConnect {
 		//edited by Mike, 20190918		
 		if (isForUpload) {
 			//main.processUpload(new String[]{args[1]});
-			main.processOTAndPTInputForUpload(new String[]{args[1]});
+//			main.processOTAndPTInputForUpload(new String[]{args[1]});
+			
+			//start at 1, due to 0 being for the server IP address
+			for(int iCount=1; iCount<args.length; iCount++) {
+				main.processOTAndPTInputForUpload(new String[]{args[iCount]});				
+			}
+			
 		}
 		else {
 			main.processDownload(new String[]{args[1]});
