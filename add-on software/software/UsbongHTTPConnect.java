@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200213
+  @date updated: 20200227
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -89,8 +89,14 @@ public class UsbongHTTPConnect {
 	private static boolean isForUpload = true;
 
 	//edited by Mike, 20190918
-	private static String serverIpAddress = "";//"http://localhost/";
-	private static final String STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD = "usbong_kms/server/storetransactionslistfortheday.php";
+	//note: to verify use this
+	//http://localhost/usbong_kms/server/storeTransactionsListsForTheDayFromOTAndPTAtSVGH.php
+	private static String serverIpAddress = "http://localhost/"; //"";
+	
+	//edited by Mike, 20200227
+/*	private static final String STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD = "usbong_kms/server/storetransactionslistfortheday.php";
+*/
+	private static final String STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD = "usbong_kms/server/storeTransactionsListsForTheDayFromPTAndOTAtSVGH.php";
 	
 	private static final String GET_TRANSACTIONS_LIST_FOR_THE_DAY_DOWNLOAD = "usbong_kms/server/gettransactionslistfortheday.php";
 
@@ -135,7 +141,10 @@ public class UsbongHTTPConnect {
 			
 			//start at 1, due to 0 being for the server IP address
 			for(int iCount=1; iCount<args.length; iCount++) {
-				main.processOTAndPTInputForUpload(new String[]{args[iCount]});				
+				//edited by Mike, 20200227
+/*				main.processOTAndPTInputForUpload(new String[]{args[iCount]});				
+*/
+				main.processUpload(new String[]{args[iCount]});
 			}
 			
 		}
@@ -145,7 +154,10 @@ public class UsbongHTTPConnect {
 	}
 	
 	private void processUpload(String[] args) throws Exception {
-		JSONObject json = processPayslipInputForUpload(args);	
+		//edited by Mike, 20200227
+/*		JSONObject json = processPayslipInputForUpload(args);	
+*/
+		JSONObject json = processOTAndPTInputForUpload(args);	
 				
 //		System.out.println("json: "+json.toString());
 
@@ -219,6 +231,11 @@ public class UsbongHTTPConnect {
 				json.put("payslip_type_id", 2);    				
 			}
 */			
+
+			//added by Mike, 20200227
+			//note that the default payslip_type_id is 2, i.e. "OT and PT Treatment"
+			json.put("report_type_id", 2);    				
+
 			Scanner sc = new Scanner(new FileInputStream(f));				
 		
 			String s;		
@@ -285,8 +302,10 @@ public class UsbongHTTPConnect {
 				}
 				
 //				String[] inputColumns = s.split("\t");
-				
-				if (inputColumns[0].equals(dateTimeStamp)) {
+
+				//removed by Mike, 20200227
+/*				if (inputColumns[0].equals(dateTimeStamp)) {
+*/	
 					JSONObject transactionInJSONFormat = new JSONObject();
 //					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
 
@@ -295,8 +314,11 @@ public class UsbongHTTPConnect {
 					json.put("i"+transactionCount, transactionInJSONFormat);    						
 
 					transactionCount++;
+
+				//removed by Mike, 20200227
+/*
 				}
-				
+*/				
 				//System.out.println(s);
 				//json.put("myKey", "myValue");    
 /*
