@@ -147,12 +147,12 @@ public class UsbongHTTPConnect {
 		//edited by Mike, 20190918		
 		if (isForUpload) {
 			//main.processUpload(new String[]{args[1]});
-//			main.processOTAndPTInputForUpload(new String[]{args[1]});
+//			main.processPTAndOTReportInputForUpload(new String[]{args[1]});
 			
 			//start at 2, due to 0 being for the action, i.e. download or upload, and 1 being for the server IP address
 			for(int iCount=2; iCount<args.length; iCount++) {
 				//edited by Mike, 20200227
-/*				main.processOTAndPTInputForUpload(new String[]{args[iCount]});				
+/*				main.processPTAndOTReportInputForUpload(new String[]{args[iCount]});				
 */
 				main.processUpload(new String[]{args[iCount]});
 			}
@@ -167,7 +167,7 @@ public class UsbongHTTPConnect {
 		//edited by Mike, 20200227
 /*		JSONObject json = processPayslipInputForUpload(args);	
 */
-		JSONObject json = processOTAndPTInputForUpload(args);	
+		JSONObject json = processPTAndOTReportInputForUpload(args);	
 				
 //		System.out.println("json: "+json.toString());
 
@@ -209,6 +209,8 @@ public class UsbongHTTPConnect {
 				//edited by Mike, 20200228
 /*				processPayslipInputAfterDownload(responseBody);
 */
+				processPTAndOTReportInputAfterDownload(responseBody);
+
 			}			
         } finally {
             httpClient.close();
@@ -217,8 +219,8 @@ public class UsbongHTTPConnect {
 		
 	//added by Mike, 20200213
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
-	//Note: Occupational and Physical Therapy Treatment Report inputs
-	private JSONObject processOTAndPTInputForUpload(String[] args) throws Exception {
+	//Note: Physical and Occupational Therapy Treatment Report inputs
+	private JSONObject processPTAndOTReportInputForUpload(String[] args) throws Exception {
 		JSONObject json = new JSONObject();
 //		json.put("myKey", "myValue");    
 
@@ -458,19 +460,20 @@ public class UsbongHTTPConnect {
 		return json;
 	}	
 
-	//added by Mike, 20200228
+	//added by Mike, 20200228; edited by Mike, 20200229
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
-	//Note: Occupational and Physical Therapy Treatment Report inputs
-	private void processPTAndOTInputAfterDownload(String s) throws Exception {		
+	//Note: Physical and Occupational Therapy Treatment Report inputs
+	//TO-DO: -update: this
+	private void processPTAndOTReportInputAfterDownload(String s) throws Exception {		
 		JSONArray nestedJsonArray = new JSONArray(s);
-		
+/*		
 		//edited by Mike, 20190917
 		PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
 		//PrintWriter writer = new PrintWriter("");
 		
 		//added by Mike, 20191026
 		PrintWriter consultationWriter = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
-		
+*/		
 		if (nestedJsonArray != null) {
 		   for(int j=0;j<nestedJsonArray.length();j++) {
 				JSONObject jo_inside = nestedJsonArray.getJSONObject(j);
@@ -491,12 +494,13 @@ public class UsbongHTTPConnect {
 				jo_inside.getString("report_type_id");    				
 
 				System.out.println(""+jo_inside.getString("report_description"));				
-				
+
+/*				
 				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
 
 				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
 				System.out.println("totalTransactionCount: "+totalTransactionCount);
-
+*/
 /*				
 				//added by Mike, 20190821
 				int count;
@@ -540,10 +544,11 @@ public class UsbongHTTPConnect {
 				}
 */				
 		   }
-		   
+/*		   
 		   //added by Mike, 20190817; edited by Mike, 20191026
 		   writer.close();
 		   consultationWriter.close();
+*/		   
 		}
 	}
 	
