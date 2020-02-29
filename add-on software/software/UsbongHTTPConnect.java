@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200227
+  @date updated: 20200229
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -85,8 +85,8 @@ public class UsbongHTTPConnect {
 	//added by Mike, 20190811
 	private static boolean isInDebugMode = false; //true;
 
-	//added by Mike, 20190814; edited by Mike, 20190917
-	private static boolean isForUpload = true;
+	//added by Mike, 20190814; edited by Mike, 20200229
+	private static boolean isForUpload = false; //default //true;
 
 	//edited by Mike, 20190918
 	//note: to verify use this
@@ -136,15 +136,21 @@ public class UsbongHTTPConnect {
 		UsbongHTTPConnect main = new UsbongHTTPConnect();
 
 		//added by Mike, 20190918
-		serverIpAddress = args[0];
+		serverIpAddress = args[1];
+		
+		isForUpload = false;
+
+		if (args[0].contains("upload")) {
+			isForUpload = true;
+		}
 
 		//edited by Mike, 20190918		
 		if (isForUpload) {
 			//main.processUpload(new String[]{args[1]});
 //			main.processOTAndPTInputForUpload(new String[]{args[1]});
 			
-			//start at 1, due to 0 being for the server IP address
-			for(int iCount=1; iCount<args.length; iCount++) {
+			//start at 2, due to 0 being for the action, i.e. download or upload, and 1 being for the server IP address
+			for(int iCount=2; iCount<args.length; iCount++) {
 				//edited by Mike, 20200227
 /*				main.processOTAndPTInputForUpload(new String[]{args[iCount]});				
 */
@@ -245,7 +251,7 @@ public class UsbongHTTPConnect {
 */			
 
 			//added by Mike, 20200227
-			//note that the default payslip_type_id is 2, i.e. "OT and PT Treatment"
+			//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
 			json.put("report_type_id", 2);    				
 
 
@@ -479,18 +485,24 @@ public class UsbongHTTPConnect {
 					writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
 				}
 */				
-				System.out.println(""+jo_inside.getString("payslip_description"));				
-				
-				JSONObject payslipInJSONFormat = new JSONObject(jo_inside.getString("payslip_description"));
 
-				int totalTransactionCount = payslipInJSONFormat.getInt("iTotal");
-				System.out.println("totalTransactionCount: "+totalTransactionCount);
+				//added by Mike, 20200229
+				//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
+				jo_inside.getString("report_type_id");    				
+
+				System.out.println(""+jo_inside.getString("report_description"));				
 				
+				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
+
+				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
+				System.out.println("totalTransactionCount: "+totalTransactionCount);
+
+/*				
 				//added by Mike, 20190821
 				int count;
 				
 				for (int i=0; i<totalTransactionCount; i++) {
-					JSONArray transactionInJSONArray = payslipInJSONFormat.getJSONArray("i"+i);
+					JSONArray transactionInJSONArray = reportInJSONFormat.getJSONArray("i"+i);
 					
 //					System.out.println(""+transactionInJSONArray.getInt(0)); //Official Receipt Number
 //					System.out.println(""+transactionInJSONArray.getString(1)); //Patient Name
@@ -498,7 +510,7 @@ public class UsbongHTTPConnect {
 					//edited by Mike, 20190821
 					count = i+1;
 					
-					String outputString = 	this.getDate(payslipInJSONFormat.getString("dateTimeStamp")) + "\t" +
+					String outputString = 	this.getDate(reportInJSONFormat.getString("dateTimeStamp")) + "\t" +
 							   count + "\t" +
 							   transactionInJSONArray.getInt(INPUT_OR_NUMBER_COLUMN) + "\t" +
 							   transactionInJSONArray.getString(INPUT_PATIENT_NAME_COLUMN) + "\t" +
@@ -517,8 +529,8 @@ public class UsbongHTTPConnect {
 
 					//edited by Mike, 20191026
 					//write in Tab-delimited .txt file
-/*					writer.write(outputString);
-*/
+////					writer.write(outputString);
+
 					if (jo_inside.getInt("payslip_type_id") == 1) {
 						consultationWriter.write(outputString);
 					}
@@ -526,6 +538,7 @@ public class UsbongHTTPConnect {
 						writer.write(outputString);
 					}
 				}
+*/				
 		   }
 		   
 		   //added by Mike, 20190817; edited by Mike, 20191026
