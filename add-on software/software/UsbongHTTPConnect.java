@@ -204,7 +204,7 @@ public class UsbongHTTPConnect {
             System.out.println(responseBody); 
 			
 			//edited by Mike, 20190820
-			if (!responseBody.contains("No payslips")) {
+			if (!responseBody.contains("No reports")) {
 				System.out.println("JSON Array----------------------------------------");			
 				//edited by Mike, 20200228
 /*				processPayslipInputAfterDownload(responseBody);
@@ -238,7 +238,7 @@ public class UsbongHTTPConnect {
 
 			//added by Mike, 20200228
 //			json.put("report_filename", new String(args[i].getBytes(), StandardCharsets.UTF_8));
-			json.put("report_filename", args[i]); //TO-DO: -add: escape slash character
+			json.put("report_filename", autoEscapeToJSONFormat(args[i])); //TO-DO: -add: escape slash character
 
 
 /*
@@ -284,7 +284,7 @@ public class UsbongHTTPConnect {
 			System.out.println(">>" + dateTimeStamp);
 
 			json.put("dateTimeStamp", dateTimeStamp);
-			json.put("inputFilename", inputFilename);    
+//			json.put("inputFilename", inputFilename);    
 
 /*	
 			if (isInDebugMode) {
@@ -330,8 +330,11 @@ public class UsbongHTTPConnect {
 					JSONObject transactionInJSONFormat = new JSONObject();
 //					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
 
-					transactionInJSONFormat.put("value", s); 		
+					//edited by Mike, 20200229
+					s = autoEscapeToJSONFormat(s);
 
+					transactionInJSONFormat.put("value", s); 		
+//					transactionInJSONFormat.put("value", s.replace("\t","\\t")); 		
 					json.put("i"+transactionCount, transactionInJSONFormat);    						
 
 					transactionCount++;
@@ -371,6 +374,22 @@ public class UsbongHTTPConnect {
 		
 		return json;
 	}	
+
+	private String autoEscapeToJSONFormat(String s) {
+		s = s.replace("\t","\\t");
+		s = s.replace("\\","\\\\");
+
+		s = s.replace("\"","");
+//		s = s.replace("\"","\\\"");
+//		s = s.replace("\'","\\'");		
+		s = s.replace("\n","\\n");
+		
+		s = s.replace("u00d1", "Ñ");
+		s = s.replace("u00f1", "ñ");
+		s = s.replace("u00ae", "®");
+		
+		return s;
+	}
 
 	//location: Sta. Lucia Health Care Centre (SLHCC): Orthopedic and Physical Therapy Unit
 	//added by Mike, 20190811; edited by Mike, 20190812
@@ -466,6 +485,11 @@ public class UsbongHTTPConnect {
 	//TO-DO: -update: this
 	private void processPTAndOTReportInputAfterDownload(String s) throws Exception {		
 		JSONArray nestedJsonArray = new JSONArray(s);
+
+//		JSONArray jo_inside = new JSONArray(s);
+
+//	JSONObject jo_inside = nestedJsonArray.getJSONObject(3);
+	
 /*		
 		//edited by Mike, 20190917
 		PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
@@ -474,9 +498,65 @@ public class UsbongHTTPConnect {
 		//added by Mike, 20191026
 		PrintWriter consultationWriter = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
 */		
+
+//		if (jo_inside != null) {
+
+
 		if (nestedJsonArray != null) {
+
 		   for(int j=0;j<nestedJsonArray.length();j++) {
 				JSONObject jo_inside = nestedJsonArray.getJSONObject(j);
+
+				System.out.println(jo_inside.getInt("report_id"));				
+				System.out.println(jo_inside.getInt("report_type_id"));
+				
+				String reportDescriptionArray = jo_inside.getString("report_description");
+
+				System.out.println(">> " +reportDescriptionArray);
+
+//				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
+
+				//TO-DO: escape tab
+				
+				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray.replace("\t",","));
+
+				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
+				System.out.println("totalTransactionCount: "+totalTransactionCount);
+
+/*				
+				//added by Mike, 20190821
+				int count;
+				
+				for (int i=0; i<totalTransactionCount; i++) {
+					JSONArray transactionInJSONArray = reportInJSONFormat.getJSONArray("i"+i);
+					
+//					System.out.println(""+transactionInJSONArray.getInt(0)); //Official Receipt Number
+//					System.out.println(""+transactionInJSONArray.getString(1)); //Patient Name
+*/
+
+
+//				for (int i=0; i<10; i++) {
+//					JSONArray transactionInJSONArray = jo_inside.getJSONArray("report_description");//"i"+i);
+
+//					System.out.println(">> " +transactionInJSONArray.getInt(0));
+
+//					int totalTransactionCount = transactionInJSONArray.getInt("iTotal");
+//					System.out.println("totalTransactionCount: "+totalTransactionCount);
+
+//				}
+
+
+
+
+	//			JSONObject jo_inside_description = jo_inside.getJSONObject("report_description");
+
+//				System.out.println(jo_inside.getInt("report_description"));
+
+		   }
+
+//				JSONObject jo_inside = nestedJsonArray.getJSONObject("report_description");
+
+//				Sting description = nestedJsonArray.getString("report_description");
 
 /*				//removed by Mike, 20191026				
 				//added by Mike, 20190917
@@ -487,14 +567,35 @@ public class UsbongHTTPConnect {
 /*				else {
 					writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
 				}
+				
 */				
-
+				
+/*				
 				//added by Mike, 20200229
-				//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
-				jo_inside.getString("report_type_id");    				
+				JSONObject jo_inside = nestedJsonArray.getJSONObject(2);
 
+				String fileName = jo_inside.getString("report_filename");    				
+				String fileType = fileName.split("_")[1];
+
+
+//				PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
+
+//				PrintWriter writer = new PrintWriter(s, "UTF-8");	
+
+
+				System.out.println("fileType: "+fileType);
+//				System.out.println("s: "+s);
+*/
+
+/*
+				//added by Mike, 20200229
+
+				System.out.println(""+jo_inside.getString("report_type_id"));    				
+				
 				System.out.println(""+jo_inside.getString("report_description"));				
+*/
 
+//				writer
 /*				
 				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
 
@@ -543,8 +644,8 @@ public class UsbongHTTPConnect {
 					}
 				}
 */				
-		   }
 /*		   
+		   }
 		   //added by Mike, 20190817; edited by Mike, 20191026
 		   writer.close();
 		   consultationWriter.close();
