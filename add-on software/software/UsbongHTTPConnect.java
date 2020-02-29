@@ -97,8 +97,12 @@ public class UsbongHTTPConnect {
 /*	private static final String STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD = "usbong_kms/server/storetransactionslistfortheday.php";
 */
 	private static final String STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD = "usbong_kms/server/storeTransactionsListsForTheDayFromPTAndOTAtSVGH.php";
-	
+
+	//edited by Mike, 20200228
+/*	
 	private static final String GET_TRANSACTIONS_LIST_FOR_THE_DAY_DOWNLOAD = "usbong_kms/server/gettransactionslistfortheday.php";
+*/
+	private static final String GET_TRANSACTIONS_LIST_FOR_THE_DAY_DOWNLOAD = "usbong_kms/server/getTransactionsListsForTheDayFromPTAndOTAtSVGH.php";
 
 	//added by Mike, 20190812
 	private static String inputFilename;
@@ -196,7 +200,9 @@ public class UsbongHTTPConnect {
 			//edited by Mike, 20190820
 			if (!responseBody.contains("No payslips")) {
 				System.out.println("JSON Array----------------------------------------");			
-				processPayslipInputAfterDownload(responseBody);
+				//edited by Mike, 20200228
+/*				processPayslipInputAfterDownload(responseBody);
+*/
 			}			
         } finally {
             httpClient.close();
@@ -219,8 +225,14 @@ public class UsbongHTTPConnect {
 		for (int i=0; i<args.length; i++) {									
 			inputFilename = args[i].replaceAll(".txt","");			
 			File f = new File(inputFilename+".txt");
-			
+
 			System.out.println("inputFilename: " + inputFilename);
+
+			//added by Mike, 20200228
+//			json.put("report_filename", new String(args[i].getBytes(), StandardCharsets.UTF_8));
+			json.put("report_filename", args[i]); //TO-DO: -add: escape slash character
+
+
 /*
 			//added by Mike, 20190917
 			//note that the default payslip_type_id is 2, i.e. "PT Treatment"
@@ -235,6 +247,7 @@ public class UsbongHTTPConnect {
 			//added by Mike, 20200227
 			//note that the default payslip_type_id is 2, i.e. "OT and PT Treatment"
 			json.put("report_type_id", 2);    				
+
 
 			Scanner sc = new Scanner(new FileInputStream(f));				
 		
@@ -438,6 +451,88 @@ public class UsbongHTTPConnect {
 		
 		return json;
 	}	
+
+	//added by Mike, 20200228
+	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
+	//Note: Occupational and Physical Therapy Treatment Report inputs
+	private void processPTAndOTInputAfterDownload(String s) throws Exception {		
+		JSONArray nestedJsonArray = new JSONArray(s);
+		
+		//edited by Mike, 20190917
+		PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
+		//PrintWriter writer = new PrintWriter("");
+		
+		//added by Mike, 20191026
+		PrintWriter consultationWriter = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
+		
+		if (nestedJsonArray != null) {
+		   for(int j=0;j<nestedJsonArray.length();j++) {
+				JSONObject jo_inside = nestedJsonArray.getJSONObject(j);
+
+/*				//removed by Mike, 20191026				
+				//added by Mike, 20190917
+				if (jo_inside.getInt("payslip_type_id") == 1) {
+					writer = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
+				}
+*/				
+/*				else {
+					writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
+				}
+*/				
+				System.out.println(""+jo_inside.getString("payslip_description"));				
+				
+				JSONObject payslipInJSONFormat = new JSONObject(jo_inside.getString("payslip_description"));
+
+				int totalTransactionCount = payslipInJSONFormat.getInt("iTotal");
+				System.out.println("totalTransactionCount: "+totalTransactionCount);
+				
+				//added by Mike, 20190821
+				int count;
+				
+				for (int i=0; i<totalTransactionCount; i++) {
+					JSONArray transactionInJSONArray = payslipInJSONFormat.getJSONArray("i"+i);
+					
+//					System.out.println(""+transactionInJSONArray.getInt(0)); //Official Receipt Number
+//					System.out.println(""+transactionInJSONArray.getString(1)); //Patient Name
+
+					//edited by Mike, 20190821
+					count = i+1;
+					
+					String outputString = 	this.getDate(payslipInJSONFormat.getString("dateTimeStamp")) + "\t" +
+							   count + "\t" +
+							   transactionInJSONArray.getInt(INPUT_OR_NUMBER_COLUMN) + "\t" +
+							   transactionInJSONArray.getString(INPUT_PATIENT_NAME_COLUMN) + "\t" +
+							   "\t" + //FEE COLUMN
+							   transactionInJSONArray.getString(INPUT_CLASSIFICATION_COLUMN) + "\t" +
+							   transactionInJSONArray.getString(INPUT_AMOUNT_PAID_COLUMN) + "\t" +
+							   //edited by Mike, 20191010
+							   transactionInJSONArray.getString(INPUT_NET_PF_COLUMN) + "\t"; //"\n";
+
+					//added by Mike, 20191010
+					outputString = outputString + jo_inside.getString("added_datetime_stamp") + "\t" +
+												  payslipInJSONFormat.getString("cashierPerson") + "\n";
+			
+					//added by Mike, 20191012
+//					outputString = outputString.replace("u00d1", "Ñ");
+
+					//edited by Mike, 20191026
+					//write in Tab-delimited .txt file
+/*					writer.write(outputString);
+*/
+					if (jo_inside.getInt("payslip_type_id") == 1) {
+						consultationWriter.write(outputString);
+					}
+					else {
+						writer.write(outputString);
+					}
+				}
+		   }
+		   
+		   //added by Mike, 20190817; edited by Mike, 20191026
+		   writer.close();
+		   consultationWriter.close();
+		}
+	}
 	
 	//added by Mike, 20190812; edited by Mike, 20191026
 	//Note: Consultation and PT Treatment payslip inputs are automatically identified
