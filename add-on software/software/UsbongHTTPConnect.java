@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200229
+  @date updated: 20200301
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -484,6 +484,9 @@ public class UsbongHTTPConnect {
 	//Note: Physical and Occupational Therapy Treatment Report inputs
 	//TO-DO: -update: this
 	private void processPTAndOTReportInputAfterDownload(String s) throws Exception {		
+
+System.out.println("downloaded string: " + s +"\n");
+
 		JSONArray nestedJsonArray = new JSONArray(s);
 
 //		JSONArray jo_inside = new JSONArray(s);
@@ -518,7 +521,7 @@ public class UsbongHTTPConnect {
 
 				//TO-DO: escape tab
 				
-				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray.replace("\t",","));
+				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray);//.replace("\t",","));
 
 				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
 				System.out.println("totalTransactionCount: "+totalTransactionCount);
