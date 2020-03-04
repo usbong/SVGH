@@ -209,6 +209,7 @@ public class UsbongHTTPConnect {
 				//edited by Mike, 20200228
 /*				processPayslipInputAfterDownload(responseBody);
 */
+
 				processPTAndOTReportInputAfterDownload(responseBody);
 
 			}			
@@ -384,10 +385,29 @@ public class UsbongHTTPConnect {
 //		s = s.replace("\'","\\'");		
 		s = s.replace("\n","\\n");
 		
+		s = s.replace("Ñ", "u00d1");
+		s = s.replace("ñ", "u00f1");
+		s = s.replace("®", "u00ae");
+		
+		return s;
+	}
+
+	private String autoEscapeFromJSONFormat(String s) {
+		s = s.replace("\\\\t","\\t");
+
+//		s = s.replace("\\\\","\\");
+
+//		s = s.replace("\"","");
+
+//		s = s.replace("\"","\\\"");
+//		s = s.replace("\'","\\'");		
+	
+		s = s.replace("\\n","\n");
+
 		s = s.replace("u00d1", "Ñ");
 		s = s.replace("u00f1", "ñ");
 		s = s.replace("u00ae", "®");
-		
+				
 		return s;
 	}
 
@@ -482,7 +502,7 @@ public class UsbongHTTPConnect {
 	//added by Mike, 20200228; edited by Mike, 20200229
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
-	//TO-DO: -update: this
+	//TO-DO: -update: this for the computer to write the values from the database in .txt files
 	private void processPTAndOTReportInputAfterDownload(String s) throws Exception {		
 
 System.out.println("downloaded string: " + s +"\n");
@@ -513,7 +533,13 @@ System.out.println("downloaded string: " + s +"\n");
 				System.out.println(jo_inside.getInt("report_id"));				
 				System.out.println(jo_inside.getInt("report_type_id"));
 				
-				String reportDescriptionArray = jo_inside.getString("report_description");
+				System.out.println("filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename")));
+
+				System.out.println("updated filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename").split("client")[1].replace("\\","")));
+								
+				PrintWriter writer = new PrintWriter("output/SVGH/server/halimbawa.txt", "UTF-8");	
+				
+				String reportDescriptionArray = autoEscapeFromJSONFormat(jo_inside.getString("report_description"));
 
 				System.out.println(">> " +reportDescriptionArray);
 
@@ -554,6 +580,8 @@ System.out.println("downloaded string: " + s +"\n");
 	//			JSONObject jo_inside_description = jo_inside.getJSONObject("report_description");
 
 //				System.out.println(jo_inside.getInt("report_description"));
+
+				writer.close();
 
 		   }
 
