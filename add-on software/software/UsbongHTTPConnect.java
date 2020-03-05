@@ -563,6 +563,9 @@ public class UsbongHTTPConnect {
 		s = s.replace("\t","\\t");
 		s = s.replace("\\","\\\\");
 
+		s = s.replace("'","u2018"); //left single quote
+		s = s.replace("'","u2019"); //right single quote
+
 		s = s.replace("\"","");
 //		s = s.replace("\"","\\\"");
 //		s = s.replace("\'","\\'");		
@@ -579,6 +582,10 @@ public class UsbongHTTPConnect {
 		s = s.replace("\\\\t","\\t");
 
 //		s = s.replace("\\\\","\\");
+
+		s = s.replace("u2018", "'"); //left single quote
+		s = s.replace("u2019", "'"); //right single quote
+
 
 //		s = s.replace("\"","");
 
