@@ -218,7 +218,7 @@ public class UsbongHTTPConnect {
         }
 	}
 		
-	//added by Mike, 20200213
+	//added by Mike, 20200213; edited by Mike, 20200304
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
 	private JSONObject processPTAndOTReportInputForUpload(String[] args) throws Exception {
@@ -292,6 +292,184 @@ public class UsbongHTTPConnect {
 				rowCount=0;
 			}
 */
+
+			JSONObject transactionInJSONFormat = new JSONObject();
+
+			rowCount=1; //start at 1 given worksheet from MS EXCEL
+						
+			//count/compute the number-based values of inputColumns 
+			while (sc.hasNextLine()) {			
+			    //edited by Mike, 20191012
+				//s=sc.nextLine();
+				s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+				
+//				System.out.println("s: " + s);
+
+				String[] inputColumns = s.split("\t");
+
+				if (rowCount==1) { //do not include table header
+/*				
+					//identify last column
+					int iColumnCount = 1; //start at 1 given worksheet from MS EXCEL
+					while (iColumnCount <= inputColumns.length) {
+						iColumnCount++;
+					}
+					
+					iLastColumnCount = iColumnCount-1;
+				
+*/					
+					rowCount++;
+
+					continue;
+				}
+
+				//if the row is blank
+				if (s.trim().equals("")) {
+					continue;
+				}
+				
+//				String[] inputColumns = s.split("\t");
+
+				//removed by Mike, 20200227
+/*				if (inputColumns[0].equals(dateTimeStamp)) {
+*/	
+					transactionInJSONFormat = new JSONObject();
+					
+//					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
+
+					//edited by Mike, 20200229
+					s = autoEscapeToJSONFormat(s);
+
+//					transactionInJSONFormat.put("value", s); 		
+					transactionInJSONFormat.put("i"+transactionCount, s); 		
+
+//					transactionInJSONFormat.put("value", s.replace("\t","\\t")); 		
+
+//					json.put("i"+transactionCount, transactionInJSONFormat);    						
+/*
+					json.put("report_description", transactionInJSONFormat);			
+*/
+
+					json.put("i"+transactionCount, transactionInJSONFormat);    				
+					transactionCount++;
+
+				//removed by Mike, 20200227
+/*
+				}
+*/				
+				//System.out.println(s);
+				//json.put("myKey", "myValue");    
+/*
+				//added by Mike, 20190812; edited by Mike, 20190816
+				JSONObject transactionInJSONFormat = new JSONObject();
+				transactionInJSONFormat.put(""+INPUT_OR_NUMBER_COLUMN, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN]));
+				transactionInJSONFormat.put(""+INPUT_PATIENT_NAME_COLUMN, inputColumns[INPUT_PATIENT_NAME_COLUMN].replace("\"",""));
+				transactionInJSONFormat.put(""+INPUT_CLASSIFICATION_COLUMN, inputColumns[INPUT_CLASSIFICATION_COLUMN]);
+				transactionInJSONFormat.put(""+INPUT_AMOUNT_PAID_COLUMN, inputColumns[INPUT_AMOUNT_PAID_COLUMN]);
+				transactionInJSONFormat.put(""+INPUT_NET_PF_COLUMN, inputColumns[INPUT_NET_PF_COLUMN]);
+
+				//edited by Mike, 20190813
+				json.put("i"+transactionCount, transactionInJSONFormat);    	
+
+				transactionCount++;
+*/				
+
+				rowCount++;
+
+				if (isInDebugMode) {
+					System.out.println("rowCount: "+rowCount);
+				}
+			}				
+/*			
+			json.put("report_description", transactionInJSONFormat);		
+*/			
+		}
+				
+		//added by Mike, 20190812; edited by Mike, 20190815
+		json.put("iTotal", transactionCount);    				
+								
+		System.out.println("json: "+json.toString());
+		
+		return json;
+	}
+	
+	//added by Mike, 20200213
+	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
+	//Note: Physical and Occupational Therapy Treatment Report inputs
+	private JSONObject processPTAndOTReportInputForUploadPrev(String[] args) throws Exception {
+		JSONObject json = new JSONObject();
+//		json.put("myKey", "myValue");    
+
+		//added by Mike, 20190812
+		int transactionCount = 0; //start from zero
+		
+		//added by Mike, 20200213
+		int iLastColumnCount = 0;
+
+		for (int i=0; i<args.length; i++) {									
+			inputFilename = args[i].replaceAll(".txt","");			
+			File f = new File(inputFilename+".txt");
+
+			System.out.println("inputFilename: " + inputFilename);
+
+			//added by Mike, 20200228
+//			json.put("report_filename", new String(args[i].getBytes(), StandardCharsets.UTF_8));
+			json.put("report_filename", autoEscapeToJSONFormat(args[i])); //TO-DO: -add: escape slash character
+
+
+/*
+			//added by Mike, 20190917
+			//note that the default payslip_type_id is 2, i.e. "PT Treatment"
+			if (inputFilename.contains("CONSULT")) {
+				json.put("payslip_type_id", 1);    				
+			}			
+			else {
+				json.put("payslip_type_id", 2);    				
+			}
+*/			
+
+			//added by Mike, 20200227
+			//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
+			json.put("report_type_id", 2);    				
+
+
+			Scanner sc = new Scanner(new FileInputStream(f));				
+		
+			String s;		
+/*			
+			//edited by Mike, 20191012
+			//s=sc.nextLine(); 			
+			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+
+			//edited by Mike, 20190917
+			json.put("dateTimeStamp", s.trim());
+
+			//edited by Mike, 20191012
+			//s=sc.nextLine(); 			
+			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+			
+			//edited by Mike, 20190917
+			json.put("cashierPerson", s.trim().replace("\"",""));    
+*/
+
+
+
+			//TO-DO: -upload: only transactions for the day
+			//output: 02/01/2020
+			String dateTimeStamp = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+			System.out.println(">>" + dateTimeStamp);
+
+			json.put("dateTimeStamp", dateTimeStamp);
+//			json.put("inputFilename", inputFilename);    
+
+/*	
+			if (isInDebugMode) {
+				rowCount=0;
+			}
+*/
+
+			JSONObject transactionInJSONFormat = new JSONObject();
+
 			rowCount=1; //start at 1 given worksheet from MS EXCEL
 						
 			//count/compute the number-based values of inputColumns 
@@ -328,15 +506,18 @@ public class UsbongHTTPConnect {
 				//removed by Mike, 20200227
 /*				if (inputColumns[0].equals(dateTimeStamp)) {
 */	
-					JSONObject transactionInJSONFormat = new JSONObject();
+					transactionInJSONFormat = new JSONObject();
 //					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
 
 					//edited by Mike, 20200229
 					s = autoEscapeToJSONFormat(s);
 
-					transactionInJSONFormat.put("value", s); 		
+//					transactionInJSONFormat.put("value", s); 		
+					transactionInJSONFormat.put("i"+transactionCount, s); 		
+
 //					transactionInJSONFormat.put("value", s.replace("\t","\\t")); 		
-					json.put("i"+transactionCount, transactionInJSONFormat);    						
+
+//					json.put("i"+transactionCount, transactionInJSONFormat);    						
 
 					transactionCount++;
 
@@ -366,15 +547,17 @@ public class UsbongHTTPConnect {
 					System.out.println("rowCount: "+rowCount);
 				}
 			}				
+			
+			json.put("report_description", transactionInJSONFormat);			
 		}
-		
+				
 		//added by Mike, 20190812; edited by Mike, 20190815
-		json.put("iTotal", transactionCount);    				
+//		json.put("iTotal", transactionCount);    				
 								
 		System.out.println("json: "+json.toString());
 		
 		return json;
-	}	
+	}
 
 	private String autoEscapeToJSONFormat(String s) {
 		s = s.replace("\t","\\t");
@@ -533,15 +716,22 @@ System.out.println("downloaded string: " + s +"\n");
 				System.out.println(jo_inside.getInt("report_id"));				
 				System.out.println(jo_inside.getInt("report_type_id"));
 				
-				System.out.println("filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename")));
+//				System.out.println("filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename")));
 
-				System.out.println("updated filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename").split("client")[1].replace("\\","")));
+				String filename = autoEscapeFromJSONFormat(jo_inside.getString("report_filename"));
+				String updatedFilename = filename.split("client")[1].replace("\\","");
+				
+//				System.out.println("updated filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename").split("client")[1].replace("\\","")));
 								
-				PrintWriter writer = new PrintWriter("output/SVGH/server/halimbawa.txt", "UTF-8");	
+//				PrintWriter writer = new PrintWriter("output/SVGH/server/halimbawa.txt", "UTF-8");	
+
+				PrintWriter writer = new PrintWriter("output/SVGH/server/" + updatedFilename, "UTF-8");	
 				
 				String reportDescriptionArray = autoEscapeFromJSONFormat(jo_inside.getString("report_description"));
 
-				System.out.println(">> " +reportDescriptionArray);
+//				System.out.println(">> " +reportDescriptionArray);
+
+				writer.write(reportDescriptionArray);
 
 //				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
 
