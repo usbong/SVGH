@@ -163,8 +163,68 @@ public class UsbongHTTPConnect {
 		}
 	}
 	
-	//TO-DO: -update: this to store each patient name as a transaction
+	//TO-DO: -update: this to store each patient name as a transaction;
+	//note: computer server executes this action after receiving the transactions list which adheres to the JSON format
+	//sending each transaction via the computer network fails, i.e. computer server does not receive the transactions
 	private void processUpload(String[] args) throws Exception {
+		//edited by Mike, 20200227
+/*		JSONObject json = processPayslipInputForUpload(args);	
+*/
+		JSONObject json = processPTAndOTReportInputForUpload(args);	
+				
+		int totalTransactionCount = json.getInt("iTotal");
+		System.out.println("totalTransactionCount: "+totalTransactionCount);
+
+//		System.out.println(json.getInt("report_id"));				
+		System.out.println(json.getInt("report_type_id"));
+		System.out.println(json.getString("report_filename"));
+		
+		for(int transactionCount=0; transactionCount<totalTransactionCount; transactionCount++) {
+			JSONObject transactionInJSONFormat = json.getJSONObject("i"+transactionCount);
+
+//			System.out.println("json: "+transactionInJSONFormat.getString(""+INPUT_PATIENT_NAME_COLUMN));
+
+/*
+			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+			try {
+				HttpPost request = new HttpPost(serverIpAddress+STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD);
+				//edited by Mike, 20200306
+//				StringEntity params = new StringEntity(json.toString(), "UTF-8");
+				StringEntity params = new StringEntity(transactionInJSONFormat.getString(""+INPUT_PATIENT_NAME_COLUMN), "UTF-8");
+
+				request.addHeader("content-type", "application/json; charset=utf-8'"); //edited by Mike, 20191012
+				request.setEntity(params);
+				httpClient.execute(request);
+			} catch (Exception ex) {
+				
+			} finally {
+				httpClient.close();
+			}
+*/
+		}
+
+
+		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+		try {
+			HttpPost request = new HttpPost(serverIpAddress+STORE_TRANSACTIONS_LIST_FOR_THE_DAY_UPLOAD);
+			
+			//edited by Mike, 20200306
+			StringEntity params = new StringEntity(json.toString(), "UTF-8");
+
+			request.addHeader("content-type", "application/json; charset=utf-8'"); //edited by Mike, 20191012
+			request.setEntity(params);
+			httpClient.execute(request);
+		} catch (Exception ex) {
+			
+		} finally {
+			httpClient.close();
+		}
+		
+	}
+
+	private void processUploadPrev(String[] args) throws Exception {
 		//edited by Mike, 20200227
 /*		JSONObject json = processPayslipInputForUpload(args);	
 */
