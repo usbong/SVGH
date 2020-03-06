@@ -163,6 +163,7 @@ public class UsbongHTTPConnect {
 		}
 	}
 	
+	//TO-DO: -update: this to store each patient name as a transaction
 	private void processUpload(String[] args) throws Exception {
 		//edited by Mike, 20200227
 /*		JSONObject json = processPayslipInputForUpload(args);	
@@ -293,8 +294,8 @@ public class UsbongHTTPConnect {
 			}
 */
 
-			JSONObject transactionInJSONFormat = new JSONObject();
-
+/*			JSONObject transactionInJSONFormat = new JSONObject();
+*/
 			rowCount=1; //start at 1 given worksheet from MS EXCEL
 						
 			//count/compute the number-based values of inputColumns 
@@ -318,6 +319,11 @@ public class UsbongHTTPConnect {
 					iLastColumnCount = iColumnCount-1;
 				
 */					
+/*
+					//edited by Mike, 20190813
+					json.put("i"+transactionCount, transactionInJSONFormat);    				
+					transactionCount++;
+*/
 					rowCount++;
 
 					continue;
@@ -328,51 +334,22 @@ public class UsbongHTTPConnect {
 					continue;
 				}
 				
-//				String[] inputColumns = s.split("\t");
 
-				//removed by Mike, 20200227
-/*				if (inputColumns[0].equals(dateTimeStamp)) {
-*/	
-					transactionInJSONFormat = new JSONObject();
-					
-//					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
+/*				transactionInJSONFormat = new JSONObject();
+				
 
-					//edited by Mike, 20200229
-					s = autoEscapeToJSONFormat(s);
+				//edited by Mike, 20200229
+				s = autoEscapeToJSONFormat(s);
 
-//					transactionInJSONFormat.put("value", s); 		
-					transactionInJSONFormat.put("i"+transactionCount, s); 		
-
-//					transactionInJSONFormat.put("value", s.replace("\t","\\t")); 		
-
-//					json.put("i"+transactionCount, transactionInJSONFormat);    						
-/*
-					json.put("report_description", transactionInJSONFormat);			
+				transactionInJSONFormat.put("i"+transactionCount, s); 		
 */
-
-					json.put("i"+transactionCount, transactionInJSONFormat);    				
-					transactionCount++;
-
-				//removed by Mike, 20200227
-/*
-				}
-*/				
-				//System.out.println(s);
-				//json.put("myKey", "myValue");    
-/*
-				//added by Mike, 20190812; edited by Mike, 20190816
+				//added by Mike, 20200306
+				//patient name
 				JSONObject transactionInJSONFormat = new JSONObject();
-				transactionInJSONFormat.put(""+INPUT_OR_NUMBER_COLUMN, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN]));
-				transactionInJSONFormat.put(""+INPUT_PATIENT_NAME_COLUMN, inputColumns[INPUT_PATIENT_NAME_COLUMN].replace("\"",""));
-				transactionInJSONFormat.put(""+INPUT_CLASSIFICATION_COLUMN, inputColumns[INPUT_CLASSIFICATION_COLUMN]);
-				transactionInJSONFormat.put(""+INPUT_AMOUNT_PAID_COLUMN, inputColumns[INPUT_AMOUNT_PAID_COLUMN]);
-				transactionInJSONFormat.put(""+INPUT_NET_PF_COLUMN, inputColumns[INPUT_NET_PF_COLUMN]);
+				transactionInJSONFormat.put(""+INPUT_PATIENT_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_PATIENT_NAME_COLUMN])); //.replace("\"",""));
 
-				//edited by Mike, 20190813
-				json.put("i"+transactionCount, transactionInJSONFormat);    	
-
+				json.put("i"+transactionCount, transactionInJSONFormat);    				
 				transactionCount++;
-*/				
 
 				rowCount++;
 
@@ -380,9 +357,6 @@ public class UsbongHTTPConnect {
 					System.out.println("rowCount: "+rowCount);
 				}
 			}				
-/*			
-			json.put("report_description", transactionInJSONFormat);		
-*/			
 		}
 				
 		//added by Mike, 20190812; edited by Mike, 20190815
@@ -393,171 +367,6 @@ public class UsbongHTTPConnect {
 		return json;
 	}
 	
-	//added by Mike, 20200213
-	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
-	//Note: Physical and Occupational Therapy Treatment Report inputs
-	private JSONObject processPTAndOTReportInputForUploadPrev(String[] args) throws Exception {
-		JSONObject json = new JSONObject();
-//		json.put("myKey", "myValue");    
-
-		//added by Mike, 20190812
-		int transactionCount = 0; //start from zero
-		
-		//added by Mike, 20200213
-		int iLastColumnCount = 0;
-
-		for (int i=0; i<args.length; i++) {									
-			inputFilename = args[i].replaceAll(".txt","");			
-			File f = new File(inputFilename+".txt");
-
-			System.out.println("inputFilename: " + inputFilename);
-
-			//added by Mike, 20200228
-//			json.put("report_filename", new String(args[i].getBytes(), StandardCharsets.UTF_8));
-			json.put("report_filename", autoEscapeToJSONFormat(args[i])); //TO-DO: -add: escape slash character
-
-
-/*
-			//added by Mike, 20190917
-			//note that the default payslip_type_id is 2, i.e. "PT Treatment"
-			if (inputFilename.contains("CONSULT")) {
-				json.put("payslip_type_id", 1);    				
-			}			
-			else {
-				json.put("payslip_type_id", 2);    				
-			}
-*/			
-
-			//added by Mike, 20200227
-			//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
-			json.put("report_type_id", 2);    				
-
-
-			Scanner sc = new Scanner(new FileInputStream(f));				
-		
-			String s;		
-/*			
-			//edited by Mike, 20191012
-			//s=sc.nextLine(); 			
-			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
-
-			//edited by Mike, 20190917
-			json.put("dateTimeStamp", s.trim());
-
-			//edited by Mike, 20191012
-			//s=sc.nextLine(); 			
-			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
-			
-			//edited by Mike, 20190917
-			json.put("cashierPerson", s.trim().replace("\"",""));    
-*/
-
-
-
-			//TO-DO: -upload: only transactions for the day
-			//output: 02/01/2020
-			String dateTimeStamp = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
-			System.out.println(">>" + dateTimeStamp);
-
-			json.put("dateTimeStamp", dateTimeStamp);
-//			json.put("inputFilename", inputFilename);    
-
-/*	
-			if (isInDebugMode) {
-				rowCount=0;
-			}
-*/
-
-			JSONObject transactionInJSONFormat = new JSONObject();
-
-			rowCount=1; //start at 1 given worksheet from MS EXCEL
-						
-			//count/compute the number-based values of inputColumns 
-			while (sc.hasNextLine()) {			
-			    //edited by Mike, 20191012
-				//s=sc.nextLine();
-				s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
-				
-//				System.out.println("s: " + s);
-
-				String[] inputColumns = s.split("\t");
-
-				if (rowCount==1) { //do not include table header
-				
-					//identify last column
-					int iColumnCount = 1; //start at 1 given worksheet from MS EXCEL
-					while (iColumnCount <= inputColumns.length) {
-						iColumnCount++;
-					}
-					
-					iLastColumnCount = iColumnCount-1;
-				
-					rowCount++;
-					continue;
-				}
-
-				//if the row is blank
-				if (s.trim().equals("")) {
-					continue;
-				}
-				
-//				String[] inputColumns = s.split("\t");
-
-				//removed by Mike, 20200227
-/*				if (inputColumns[0].equals(dateTimeStamp)) {
-*/	
-					transactionInJSONFormat = new JSONObject();
-//					transactionInJSONFormat.put(""+iColumnCount, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN])); 					
-
-					//edited by Mike, 20200229
-					s = autoEscapeToJSONFormat(s);
-
-//					transactionInJSONFormat.put("value", s); 		
-					transactionInJSONFormat.put("i"+transactionCount, s); 		
-
-//					transactionInJSONFormat.put("value", s.replace("\t","\\t")); 		
-
-//					json.put("i"+transactionCount, transactionInJSONFormat);    						
-
-					transactionCount++;
-
-				//removed by Mike, 20200227
-/*
-				}
-*/				
-				//System.out.println(s);
-				//json.put("myKey", "myValue");    
-/*
-				//added by Mike, 20190812; edited by Mike, 20190816
-				JSONObject transactionInJSONFormat = new JSONObject();
-				transactionInJSONFormat.put(""+INPUT_OR_NUMBER_COLUMN, Integer.parseInt(inputColumns[INPUT_OR_NUMBER_COLUMN]));
-				transactionInJSONFormat.put(""+INPUT_PATIENT_NAME_COLUMN, inputColumns[INPUT_PATIENT_NAME_COLUMN].replace("\"",""));
-				transactionInJSONFormat.put(""+INPUT_CLASSIFICATION_COLUMN, inputColumns[INPUT_CLASSIFICATION_COLUMN]);
-				transactionInJSONFormat.put(""+INPUT_AMOUNT_PAID_COLUMN, inputColumns[INPUT_AMOUNT_PAID_COLUMN]);
-				transactionInJSONFormat.put(""+INPUT_NET_PF_COLUMN, inputColumns[INPUT_NET_PF_COLUMN]);
-
-				//edited by Mike, 20190813
-				json.put("i"+transactionCount, transactionInJSONFormat);    	
-
-				transactionCount++;
-*/				
-
-				if (isInDebugMode) {
-					rowCount++;
-					System.out.println("rowCount: "+rowCount);
-				}
-			}				
-			
-			json.put("report_description", transactionInJSONFormat);			
-		}
-				
-		//added by Mike, 20190812; edited by Mike, 20190815
-//		json.put("iTotal", transactionCount);    				
-								
-		System.out.println("json: "+json.toString());
-		
-		return json;
-	}
 
 	private String autoEscapeToJSONFormat(String s) {
 		s = s.replace("\t","\\t");
@@ -699,22 +508,6 @@ System.out.println("downloaded string: " + s +"\n");
 
 		JSONArray nestedJsonArray = new JSONArray(s);
 
-//		JSONArray jo_inside = new JSONArray(s);
-
-//	JSONObject jo_inside = nestedJsonArray.getJSONObject(3);
-	
-/*		
-		//edited by Mike, 20190917
-		PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
-		//PrintWriter writer = new PrintWriter("");
-		
-		//added by Mike, 20191026
-		PrintWriter consultationWriter = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
-*/		
-
-//		if (jo_inside != null) {
-
-
 		if (nestedJsonArray != null) {
 
 		   for(int j=0;j<nestedJsonArray.length();j++) {
@@ -739,145 +532,15 @@ System.out.println("downloaded string: " + s +"\n");
 //				System.out.println(">> " +reportDescriptionArray);
 
 				writer.write(reportDescriptionArray);
-
-//				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
-
-				//TO-DO: escape tab
 				
 				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray);//.replace("\t",","));
 
 				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
 				System.out.println("totalTransactionCount: "+totalTransactionCount);
 
-/*				
-				//added by Mike, 20190821
-				int count;
-				
-				for (int i=0; i<totalTransactionCount; i++) {
-					JSONArray transactionInJSONArray = reportInJSONFormat.getJSONArray("i"+i);
-					
-//					System.out.println(""+transactionInJSONArray.getInt(0)); //Official Receipt Number
-//					System.out.println(""+transactionInJSONArray.getString(1)); //Patient Name
-*/
-
-
-//				for (int i=0; i<10; i++) {
-//					JSONArray transactionInJSONArray = jo_inside.getJSONArray("report_description");//"i"+i);
-
-//					System.out.println(">> " +transactionInJSONArray.getInt(0));
-
-//					int totalTransactionCount = transactionInJSONArray.getInt("iTotal");
-//					System.out.println("totalTransactionCount: "+totalTransactionCount);
-
-//				}
-
-
-
-
-	//			JSONObject jo_inside_description = jo_inside.getJSONObject("report_description");
-
-//				System.out.println(jo_inside.getInt("report_description"));
-
 				writer.close();
 
-		   }
-
-//				JSONObject jo_inside = nestedJsonArray.getJSONObject("report_description");
-
-//				Sting description = nestedJsonArray.getString("report_description");
-
-/*				//removed by Mike, 20191026				
-				//added by Mike, 20190917
-				if (jo_inside.getInt("payslip_type_id") == 1) {
-					writer = new PrintWriter("output/payslipConsultationFromCashier.txt", "UTF-8");	
-				}
-*/				
-/*				else {
-					writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
-				}
-				
-*/				
-				
-/*				
-				//added by Mike, 20200229
-				JSONObject jo_inside = nestedJsonArray.getJSONObject(2);
-
-				String fileName = jo_inside.getString("report_filename");    				
-				String fileType = fileName.split("_")[1];
-
-
-//				PrintWriter writer = new PrintWriter("output/payslipPTFromCashier.txt", "UTF-8");	
-
-//				PrintWriter writer = new PrintWriter(s, "UTF-8");	
-
-
-				System.out.println("fileType: "+fileType);
-//				System.out.println("s: "+s);
-*/
-
-/*
-				//added by Mike, 20200229
-
-				System.out.println(""+jo_inside.getString("report_type_id"));    				
-				
-				System.out.println(""+jo_inside.getString("report_description"));				
-*/
-
-//				writer
-/*				
-				JSONObject reportInJSONFormat = new JSONObject(jo_inside.getString("report_description"));
-
-				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
-				System.out.println("totalTransactionCount: "+totalTransactionCount);
-*/
-/*				
-				//added by Mike, 20190821
-				int count;
-				
-				for (int i=0; i<totalTransactionCount; i++) {
-					JSONArray transactionInJSONArray = reportInJSONFormat.getJSONArray("i"+i);
-					
-//					System.out.println(""+transactionInJSONArray.getInt(0)); //Official Receipt Number
-//					System.out.println(""+transactionInJSONArray.getString(1)); //Patient Name
-
-					//edited by Mike, 20190821
-					count = i+1;
-					
-					String outputString = 	this.getDate(reportInJSONFormat.getString("dateTimeStamp")) + "\t" +
-							   count + "\t" +
-							   transactionInJSONArray.getInt(INPUT_OR_NUMBER_COLUMN) + "\t" +
-							   transactionInJSONArray.getString(INPUT_PATIENT_NAME_COLUMN) + "\t" +
-							   "\t" + //FEE COLUMN
-							   transactionInJSONArray.getString(INPUT_CLASSIFICATION_COLUMN) + "\t" +
-							   transactionInJSONArray.getString(INPUT_AMOUNT_PAID_COLUMN) + "\t" +
-							   //edited by Mike, 20191010
-							   transactionInJSONArray.getString(INPUT_NET_PF_COLUMN) + "\t"; //"\n";
-
-					//added by Mike, 20191010
-					outputString = outputString + jo_inside.getString("added_datetime_stamp") + "\t" +
-												  payslipInJSONFormat.getString("cashierPerson") + "\n";
-			
-					//added by Mike, 20191012
-//					outputString = outputString.replace("u00d1", "Ñ");
-
-					//edited by Mike, 20191026
-					//write in Tab-delimited .txt file
-////					writer.write(outputString);
-
-					if (jo_inside.getInt("payslip_type_id") == 1) {
-						consultationWriter.write(outputString);
-					}
-					else {
-						writer.write(outputString);
-					}
-				}
-*/				
-/*		   
-		   }
-		   //added by Mike, 20190817; edited by Mike, 20191026
-		   writer.close();
-		   consultationWriter.close();
-*/		   
+		   }   
 		}
 	}
 	
