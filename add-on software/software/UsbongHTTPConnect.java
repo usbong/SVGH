@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200301
+  @date updated: 20200308
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -109,12 +109,22 @@ public class UsbongHTTPConnect {
 	private static int rowCount;
 
 	//TO-DO: -update: this
-	//added by Mike, 20190811	
+	//added by Mike, 20190811; edited by Mike, 20200308
 	private static final int INPUT_OR_NUMBER_COLUMN = 0; //Official Receipt Number
 	private static final int INPUT_PATIENT_NAME_COLUMN = 1;
 	private static final int INPUT_CLASSIFICATION_COLUMN = 2;
 	private static final int INPUT_AMOUNT_PAID_COLUMN = 3;
 	private static final int INPUT_NET_PF_COLUMN = 4;
+
+	private static final int INPUT_TRANSACTION_DATE_COLUMN = 0;
+//	private static final int INPUT_PATIENT_NAME_COLUMN = 1;
+	private static final int INPUT_TRANSACTION_FEE_COLUMN = 17; //column R
+	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN = 18; //column S
+	private static final int INPUT_TRANSACTION_HMO_NAME_COLUMN = 18; //column S
+	
+	private static final int INPUT_TRANSACTION_FEE_COLUMN_IN_PT = 18; //column S
+	private static final int INPUT_TRANSACTION_FEE_DISCOUNTCOLUMN_IN_PT = 17; //column Q
+	
 	
 /*	
 	private static String TAG = "usbong.HTTPConnect.storeTransactionsListForTheDay";	
@@ -406,8 +416,45 @@ public class UsbongHTTPConnect {
 				//added by Mike, 20200306
 				//patient name
 				JSONObject transactionInJSONFormat = new JSONObject();
+
 				transactionInJSONFormat.put(""+INPUT_PATIENT_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_PATIENT_NAME_COLUMN])); //.replace("\"",""));
 
+				//added by Mike, 20200308
+				transactionInJSONFormat.put(""+INPUT_TRANSACTION_DATE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DATE_COLUMN]));
+				
+				if (inputFilename.contains("IN-PT")) {
+					//TO-DO: -update: this
+/*					
+					private static final int INPUT_TRANSACTION_FEE_COLUMN_IN_PT = 19; //column S
+					private static final int INPUT_TRANSACTION_FEE_DISCOUNTCOLUMN_IN_PT = 18; //column Q
+*/				
+				}
+				else {
+					transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_COLUMN]));
+
+//					if (isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
+						if ((inputFilename.contains("LASER CASH")) || (inputFilename.contains("SWT CASH"))) {
+							transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN, -1);
+						}
+						else {
+							if (inputColumns.length!=INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN) {
+								transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN]));
+							}
+
+							//hmo name
+							if (inputColumns.length!=INPUT_TRANSACTION_HMO_NAME_COLUMN) {
+								if (isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
+									transactionInJSONFormat.put(""+INPUT_TRANSACTION_HMO_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]));
+								}
+							}
+						}
+/*					}
+					else { //hmo name
+						transactionInJSONFormat.put(""+INPUT_TRANSACTION_HMO_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]));
+					}
+*/
+				}
+				
 				json.put("i"+transactionCount, transactionInJSONFormat);    				
 				transactionCount++;
 
@@ -695,6 +742,20 @@ System.out.println("downloaded string: " + s +"\n");
 		
 		return dateStringPart2[1] + "/" + dateStringPart2[2] + "/" + dateStringPart2[0];
 	}	
+
+	//added by Mike, 20200308
+	//Reference:
+	//https://stackoverflow.com/questions/1102891/how-to-check-if-a-string-is-numeric-in-java;
+	//answer by: CraigTP on 20090709; edited by: Javad Besharati on 20190302
+	public static boolean isNumeric(String str) { 
+	  try {  
+		Double.parseDouble(str);  
+		return true;
+	  } catch(NumberFormatException e){  
+		return false;  
+	  }  
+	}
+
 }
 
 //added by Mike, 20190814; edited by Mike, 20190815
