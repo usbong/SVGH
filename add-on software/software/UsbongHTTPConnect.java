@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200308
+  @date updated: 20200313
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -121,10 +121,14 @@ public class UsbongHTTPConnect {
 	private static final int INPUT_TRANSACTION_FEE_COLUMN = 17; //column R
 	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN = 18; //column S
 	private static final int INPUT_TRANSACTION_HMO_NAME_COLUMN = 18; //column S
+	private static final int INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN = 13; //column N //added by Mike, 20200310
+	private static final int INPUT_TRANSACTION_DIAGNOSIS_COLUMN = 14; //column O //added by Mike, 20200313
 	
 	private static final int INPUT_TRANSACTION_FEE_COLUMN_IN_PT = 18; //column S
-	private static final int INPUT_TRANSACTION_FEE_DISCOUNTCOLUMN_IN_PT = 17; //column Q
-	
+	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN_IN_PT = 17; //column Q
+	private static final int INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN_IN_PT = 11; //column L //added by Mike, 20200310
+	private static final int INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT = 12; //column M //added by Mike, 20200313
+
 	
 /*	
 	private static String TAG = "usbong.HTTPConnect.storeTransactionsListForTheDay";	
@@ -423,30 +427,79 @@ public class UsbongHTTPConnect {
 				transactionInJSONFormat.put(""+INPUT_TRANSACTION_DATE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DATE_COLUMN]));
 				
 				if (inputFilename.contains("IN-PT")) {
-					//TO-DO: -update: this
-/*					
-					private static final int INPUT_TRANSACTION_FEE_COLUMN_IN_PT = 19; //column S
-					private static final int INPUT_TRANSACTION_FEE_DISCOUNTCOLUMN_IN_PT = 18; //column Q
-*/				
+					transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_COLUMN_IN_PT]));
+
+					transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN, inputColumns[INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN_IN_PT]);
+
+					//TO-DO: -update: this to include HMO payments
+					//added by Mike, 20200309
+					transactionInJSONFormat.put("transactionType", "CASH");
+					transactionInJSONFormat.put("treatmentType", "IN-PT");
+
+					//added by Mike, 20200313
+					transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT]));										
 				}
 				else {
+					//edited by Mike, 20200309
 					transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_COLUMN]));
+
+/*
+					if (inputColumns[INPUT_TRANSACTION_FEE_COLUMN].equals("NC")) {
+						transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_COLUMN, "NC");
+					}
+					else {
+						transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_COLUMN]));
+					}
+*/
 
 //					if (isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
 						if ((inputFilename.contains("LASER CASH")) || (inputFilename.contains("SWT CASH"))) {
 							transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN, -1);
+
+							//added by Mike, 20200309
+							transactionInJSONFormat.put("transactionType", "CASH");
+							
+							//added by Mike, 20200310
+							if (inputFilename.contains("LASER")) {
+								transactionInJSONFormat.put("treatmentType", "LASER");
+							}
+							else if (inputFilename.contains("SWT CASH")) {
+								transactionInJSONFormat.put("treatmentType", "SWT");
+							}							
 						}
 						else {
+							//has discount
 							if (inputColumns.length!=INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN) {
 								transactionInJSONFormat.put(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN]));
+								
+								//added by Mike, 20200309
+								transactionInJSONFormat.put("transactionType", "SC/PWD");
 							}
-
-							//hmo name
-							if (inputColumns.length!=INPUT_TRANSACTION_HMO_NAME_COLUMN) {
-								if (isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
-									transactionInJSONFormat.put(""+INPUT_TRANSACTION_HMO_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]));
+							else {
+								if (!inputColumns[INPUT_TRANSACTION_FEE_COLUMN].equals("NC")) {
+									transactionInJSONFormat.put("transactionType", "CASH");	
+								}
+								else {
+									transactionInJSONFormat.put("transactionType", "NC");	
 								}
 							}
+							
+							//hmo name
+							if (inputColumns.length!=INPUT_TRANSACTION_HMO_NAME_COLUMN) {
+								if (!isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
+									transactionInJSONFormat.put(""+INPUT_TRANSACTION_HMO_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]));
+
+									//added by Mike, 20200309
+									transactionInJSONFormat.put("transactionType", inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]);
+								}
+							}
+														
+							//added by Mike, 20200310
+							transactionInJSONFormat.put("treatmentType", inputColumns[INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN]);
+							
+							//added by Mike, 20200313
+							transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN]));
+
 						}
 /*					}
 					else { //hmo name
@@ -476,6 +529,9 @@ public class UsbongHTTPConnect {
 	
 
 	private String autoEscapeToJSONFormat(String s) {
+		//added by Mike, 20200313
+		s = s.trim();
+		
 		s = s.replace("\t","\\t");
 		s = s.replace("\\","\\\\");
 
@@ -489,7 +545,12 @@ public class UsbongHTTPConnect {
 		
 		s = s.replace("Ñ", "u00d1");
 		s = s.replace("ñ", "u00f1");
-		s = s.replace("®", "u00ae");
+//		s = s.replace("®", "u00ae");
+//		s = s.replace("(R)", "u00ae");
+		
+//		s = s.replace("˚", "u00b0");
+		s = s.replace("?", "u00b0");
+
 		
 		return s;
 	}
@@ -512,7 +573,10 @@ public class UsbongHTTPConnect {
 
 		s = s.replace("u00d1", "Ñ");
 		s = s.replace("u00f1", "ñ");
-		s = s.replace("u00ae", "®");
+//		s = s.replace("u00ae", "®");
+//		s = s.replace("u00ae", "(R)");
+		
+		s = s.replace("u00b0", "˚");
 				
 		return s;
 	}
