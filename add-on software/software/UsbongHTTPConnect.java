@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200313
+  @date updated: 20200317
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -173,7 +173,8 @@ public class UsbongHTTPConnect {
 			
 		}
 		else {
-			main.processDownload(new String[]{args[1]});
+			//args[2] = output directory 
+			main.processDownload(args[2]); //new String[]{args[1]});
 		}
 	}
 	
@@ -261,9 +262,10 @@ public class UsbongHTTPConnect {
 		}
 	}
 	
-	//added by Mike, 20190814; edited by Mike, 20190815
+	//added by Mike, 20190814; edited by Mike, 20200317
 	//Reference: https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/examples/org/apache/http/examples/client/ClientWithResponseHandler.java; last accessed: 20190814
-	private void processDownload(String[] args) throws Exception {
+//	private void processDownload(String[] args) throws Exception {
+	private void processDownload(String outputDirectory) throws Exception {
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
 		 try {
@@ -285,7 +287,7 @@ public class UsbongHTTPConnect {
 /*				processPayslipInputAfterDownload(responseBody);
 */
 
-				processPTAndOTReportInputAfterDownload(responseBody);
+				processPTAndOTReportInputAfterDownload(responseBody, outputDirectory);
 
 			}			
         } finally {
@@ -669,11 +671,61 @@ public class UsbongHTTPConnect {
 		return json;
 	}	
 
-	//added by Mike, 20200228; edited by Mike, 20200229
+
+	//added by Mike, 20200228; edited by Mike, 20200317
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
 	//TO-DO: -update: this for the computer to write the values from the database in .txt files
-	private void processPTAndOTReportInputAfterDownload(String s) throws Exception {		
+	private void processPTAndOTReportInputAfterDownload(String s, String outputDirectory) throws Exception {		
+
+System.out.println("downloaded string: " + s +"\n");
+
+		JSONArray nestedJsonArray = new JSONArray(s);
+
+		if (nestedJsonArray != null) {
+
+		   for(int j=0;j<nestedJsonArray.length();j++) {
+				JSONObject jo_inside = nestedJsonArray.getJSONObject(j);
+
+				System.out.println(jo_inside.getInt("report_id"));				
+				System.out.println(jo_inside.getInt("report_type_id"));
+				
+//				System.out.println("filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename")));
+
+				String filename = autoEscapeFromJSONFormat(jo_inside.getString("report_filename"));
+				String updatedFilename = filename.split("client")[1].replace("\\","");
+				
+//				System.out.println("updated filename: " + autoEscapeFromJSONFormat(jo_inside.getString("report_filename").split("client")[1].replace("\\","")));
+								
+//				PrintWriter writer = new PrintWriter("output/SVGH/server/halimbawa.txt", "UTF-8");	
+
+/*				PrintWriter writer = new PrintWriter("output/SVGH/server/" + updatedFilename, "UTF-8");	
+*/
+				PrintWriter writer = new PrintWriter(outputDirectory + updatedFilename, "UTF-8");	
+				
+				String reportDescriptionArray = autoEscapeFromJSONFormat(jo_inside.getString("report_description"));
+
+//				System.out.println(">> " +reportDescriptionArray);
+
+				writer.write(reportDescriptionArray);
+				
+				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray);//.replace("\t",","));
+
+				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
+				System.out.println("totalTransactionCount: "+totalTransactionCount);
+
+				writer.close();
+
+		   }   
+		}
+	}
+
+
+	//added by Mike, 20200228; edited by Mike, 20200317
+	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
+	//Note: Physical and Occupational Therapy Treatment Report inputs
+	//TO-DO: -update: this for the computer to write the values from the database in .txt files
+	private void processPTAndOTReportInputAfterDownloadPrev(String s) throws Exception {		
 
 System.out.println("downloaded string: " + s +"\n");
 
