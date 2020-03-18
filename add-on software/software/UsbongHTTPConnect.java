@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200317
+  @date updated: 20200318
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -62,6 +62,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.StringEntity;
+
+import java.util.Iterator; //added by Mike, 20200318
 
 import java.util.Scanner;
 import java.nio.charset.StandardCharsets;
@@ -706,14 +708,32 @@ System.out.println("downloaded string: " + s +"\n");
 				String reportDescriptionArray = autoEscapeFromJSONFormat(jo_inside.getString("report_description"));
 
 //				System.out.println(">> " +reportDescriptionArray);
-
+/*
 				writer.write(reportDescriptionArray);
-				
+*/				
 				JSONObject reportInJSONFormat = new JSONObject(reportDescriptionArray);//.replace("\t",","));
 
-				int totalTransactionCount = reportInJSONFormat.getInt("iTotal");
-				System.out.println("totalTransactionCount: "+totalTransactionCount);
+				int iTotalTransactionCount = reportInJSONFormat.getInt("iTotal");
+				System.out.println("totalTransactionCount: "+iTotalTransactionCount);
+				System.out.println("report_filename: "+reportInJSONFormat.getString("report_filename"));
 
+				for(int iCount=0; iCount<iTotalTransactionCount; iCount++) {
+					if (!reportInJSONFormat.isNull("i"+iCount)) {
+//						reportInJSONFormat.getJSONObject("i"+iCount).toString()
+
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString("0")); //date
+						writer.write("\n"); //new line
+					}
+				}
+
+/*
+				if (!reportInJSONFormat.isNull("i0")) {
+					System.out.println("i0: "+reportInJSONFormat.getJSONObject("i0").toString());
+					System.out.println("i0: "+reportInJSONFormat.getJSONObject("i0").getString("0"));
+
+				}
+*/				
+				
 				writer.close();
 
 		   }   
