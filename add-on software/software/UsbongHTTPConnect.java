@@ -119,7 +119,7 @@ public class UsbongHTTPConnect {
 	private static final int INPUT_NET_PF_COLUMN = 4;
 
 	private static final int INPUT_TRANSACTION_DATE_COLUMN = 0;
-//	private static final int INPUT_PATIENT_NAME_COLUMN = 1;
+	private static final int INPUT_TRANSACTION_PATIENT_NAME_COLUMN = 1; //added by Mike, 20200318
 	private static final int INPUT_TRANSACTION_FEE_COLUMN = 17; //column R
 	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN = 18; //column S
 	private static final int INPUT_TRANSACTION_HMO_NAME_COLUMN = 18; //column S
@@ -674,7 +674,7 @@ public class UsbongHTTPConnect {
 	}	
 
 
-	//added by Mike, 20200228; edited by Mike, 20200317
+	//added by Mike, 20200228; edited by Mike, 20200318
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
 	//TO-DO: -update: this for the computer to write the values from the database in .txt files
@@ -720,8 +720,46 @@ System.out.println("downloaded string: " + s +"\n");
 				for(int iCount=0; iCount<iTotalTransactionCount; iCount++) {
 					if (!reportInJSONFormat.isNull("i"+iCount)) {
 //						reportInJSONFormat.getJSONObject("i"+iCount).toString()
+	
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_DATE_COLUMN)); //0, date
 
-						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString("0")); //date
+						writer.write("\t");							
+
+						//TO-DO: -add: process IN-PT transactions
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_PATIENT_NAME_COLUMN)); //1, patient name
+						
+						//TO-DO: -add: actual column values
+						//add tabs
+						for (int iTabCount=INPUT_TRANSACTION_PATIENT_NAME_COLUMN; iTabCount<INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN; iTabCount++) {
+							writer.write("\t");							
+						}
+/*						
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN));
+*/
+						//TO-DO: -update: this; use filename
+/*															
+writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString("transactionType")+"\t");
+*/
+						//add tabs
+						for (int iTabCount=INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN; iTabCount<INPUT_TRANSACTION_FEE_COLUMN; iTabCount++) {
+							writer.write("\t");							
+						}
+
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_FEE_COLUMN));
+
+						writer.write("\t");							
+
+						//note: no senior discount for these transaction types
+						if ((filename.contains("LASER")) || (filename.contains("SWT"))) {
+						}
+						else {							
+							if (!reportInJSONFormat.getJSONObject("i"+iCount).isNull(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN)) {
+								writer.write(""+reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN)); //note this value automatically becomes HMO name if HMO transaction		
+
+								writer.write("\t");							
+							}						
+						}
+
 						writer.write("\n"); //new line
 					}
 				}
