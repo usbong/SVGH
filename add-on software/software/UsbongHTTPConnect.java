@@ -9,7 +9,7 @@
 
   @author: Michael Syson
   @date created: 20190807
-  @date updated: 20200318
+  @date updated: 20200319
 
   Given:
   1) Lists with the details of the transactions for the day from the Physical and Occupational Therapists workbook at our partner hospital, St. Vincent General Hospital (SVGH)
@@ -296,8 +296,227 @@ public class UsbongHTTPConnect {
             httpClient.close();
         }
 	}
+
+	//added by Mike, 20200213; edited by Mike, 20200319
+	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
+	//Note: Physical and Occupational Therapy Treatment Report inputs
+	//TO-DO: -update: to upload in batches due to length transaction details exceeds the limit
+	//TO-DO: -update: to upload only patient demographics
+	private JSONObject processPTAndOTReportInputForUploadPrev(String[] args) throws Exception {
+		JSONObject json = new JSONObject();
+//		json.put("myKey", "myValue");    
+
+		//added by Mike, 20190812
+		int transactionCount = 0; //start from zero
 		
-	//added by Mike, 20200213; edited by Mike, 20200304
+		//added by Mike, 20200213
+		int iLastColumnCount = 0;
+
+		for (int i=0; i<args.length; i++) {									
+			inputFilename = args[i].replaceAll(".txt","");			
+			File f = new File(inputFilename+".txt");
+
+			System.out.println("inputFilename: " + inputFilename);
+
+			//added by Mike, 20200228
+//			json.put("report_filename", new String(args[i].getBytes(), StandardCharsets.UTF_8));
+			json.put("report_filename", autoEscapeToJSONFormat(args[i])); //TO-DO: -add: escape slash character
+
+
+/*
+			//added by Mike, 20190917
+			//note that the default payslip_type_id is 2, i.e. "PT Treatment"
+			if (inputFilename.contains("CONSULT")) {
+				json.put("payslip_type_id", 1);    				
+			}			
+			else {
+				json.put("payslip_type_id", 2);    				
+			}
+*/			
+
+			//added by Mike, 20200227
+			//note that the default report_type_id is 2, i.e. "OT and PT Treatment"
+			json.put("report_type_id", 2);    				
+
+
+			Scanner sc = new Scanner(new FileInputStream(f));				
+		
+			String s;		
+/*			
+			//edited by Mike, 20191012
+			//s=sc.nextLine(); 			
+			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+
+			//edited by Mike, 20190917
+			json.put("dateTimeStamp", s.trim());
+
+			//edited by Mike, 20191012
+			//s=sc.nextLine(); 			
+			s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+			
+			//edited by Mike, 20190917
+			json.put("cashierPerson", s.trim().replace("\"",""));    
+*/
+
+
+
+			//TO-DO: -upload: only transactions for the day
+			//output: 02/01/2020
+			String dateTimeStamp = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+			System.out.println(">>" + dateTimeStamp);
+
+			json.put("dateTimeStamp", dateTimeStamp);
+//			json.put("inputFilename", inputFilename);    
+
+/*	
+			if (isInDebugMode) {
+				rowCount=0;
+			}
+*/
+
+/*			JSONObject transactionInJSONFormat = new JSONObject();
+*/
+			rowCount=1; //start at 1 given worksheet from MS EXCEL
+						
+			//count/compute the number-based values of inputColumns 
+			while (sc.hasNextLine()) {			
+			    //edited by Mike, 20191012
+				//s=sc.nextLine();
+				s = new String(sc.nextLine().getBytes(), StandardCharsets.UTF_8);
+				
+//				System.out.println("s: " + s);
+
+				String[] inputColumns = s.split("\t");
+
+				if (rowCount==1) { //do not include table header
+/*				
+					//identify last column
+					int iColumnCount = 1; //start at 1 given worksheet from MS EXCEL
+					while (iColumnCount <= inputColumns.length) {
+						iColumnCount++;
+					}
+					
+					iLastColumnCount = iColumnCount-1;
+				
+*/					
+/*
+					//edited by Mike, 20190813
+					json.put("i"+transactionCount, transactionInJSONFormat);    				
+					transactionCount++;
+*/
+					//TO-DO: -add: auto-identify last column
+					//identify last column
+					
+					if ((inputFilename.contains("CASH")) || (inputFilename.contains("CASH NEW"))) {
+						iLastColumnCount = 19; //column T; start count at 0
+					}
+					else if ((inputFilename.contains("LASER")) || (inputFilename.contains("SWT"))) {
+						if (inputFilename.contains("CASH")) {
+							iLastColumnCount = 17; //column R; start count at 0
+						}
+						else {
+							iLastColumnCount = 18; //column S; start count at 0
+						}
+					}
+					else if ((inputFilename.contains("HMO")) || (inputFilename.contains("HMO NEW"))) {
+						iLastColumnCount = 19; //column T; start count at 0
+					}
+					else {
+						iLastColumnCount = 18; //column S; start count at 0
+					}
+
+					rowCount++;
+
+					continue;
+				}
+
+				//if the row is blank
+				if (s.trim().equals("")) {
+					continue;
+				}
+				
+				//added by Mike, 20200306
+				//patient name
+				JSONObject transactionInJSONFormat = new JSONObject();
+
+				for (int iColumnCount = 0; iColumnCount < iLastColumnCount; iColumnCount++) {
+					transactionInJSONFormat.put(""+iColumnCount, autoEscapeToJSONFormat(inputColumns[iColumnCount])); 					
+				}
+				
+				if (inputFilename.contains("IN-PT")) {
+					//TO-DO: -update: this to include HMO payments
+					//added by Mike, 20200309
+					transactionInJSONFormat.put("transactionType", "CASH");
+					transactionInJSONFormat.put("treatmentType", "IN-PT");
+
+					//added by Mike, 20200313
+					transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT]));							
+				}
+				else {
+//					if (isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
+						if ((inputFilename.contains("LASER CASH")) || (inputFilename.contains("SWT CASH"))) {
+							//added by Mike, 20200309
+							transactionInJSONFormat.put("transactionType", "CASH");
+							
+							//added by Mike, 20200310
+							if (inputFilename.contains("LASER")) {
+								transactionInJSONFormat.put("treatmentType", "LASER");
+							}
+							else if (inputFilename.contains("SWT CASH")) {
+								transactionInJSONFormat.put("treatmentType", "SWT");
+							}							
+						}
+						else {
+							//has discount
+							if (inputColumns.length!=INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN) {
+								//added by Mike, 20200309
+								transactionInJSONFormat.put("transactionType", "SC/PWD");
+							}
+							else {
+								if (!inputColumns[INPUT_TRANSACTION_FEE_COLUMN].equals("NC")) {
+									transactionInJSONFormat.put("transactionType", "CASH");	
+								}
+								else {
+									transactionInJSONFormat.put("transactionType", "NC");
+								}
+							}
+							
+							//hmo name
+							if (inputColumns.length!=INPUT_TRANSACTION_HMO_NAME_COLUMN) {
+								if (!isNumeric(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN])) {
+									//added by Mike, 20200309
+									transactionInJSONFormat.put("transactionType", inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]);
+								}
+							}
+														
+							//added by Mike, 20200310
+							transactionInJSONFormat.put("treatmentType", inputColumns[INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN]);
+							
+							//added by Mike, 20200313
+							transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN]));
+						}
+				}
+				
+				json.put("i"+transactionCount, transactionInJSONFormat);    				
+				transactionCount++;
+
+				rowCount++;
+
+				if (isInDebugMode) {
+					System.out.println("rowCount: "+rowCount);
+				}
+			}				
+		}
+				
+		//added by Mike, 20190812; edited by Mike, 20190815
+		json.put("iTotal", transactionCount);    				
+								
+		System.out.println("json: "+json.toString());
+		
+		return json;
+	}
+		
+	//added by Mike, 20200213; edited by Mike, 20200319
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
 	private JSONObject processPTAndOTReportInputForUpload(String[] args) throws Exception {
@@ -674,10 +893,9 @@ public class UsbongHTTPConnect {
 	}	
 
 
-	//added by Mike, 20200228; edited by Mike, 20200318
+	//added by Mike, 20200228; edited by Mike, 20200319
 	//location: St. Vincent General Hospital (SVGH): Orthopedic and Physical Rehabilitation Unit
 	//Note: Physical and Occupational Therapy Treatment Report inputs
-	//TO-DO: -update: this for the computer to write the values from the database in .txt files
 	private void processPTAndOTReportInputAfterDownload(String s, String outputDirectory) throws Exception {		
 
 System.out.println("downloaded string: " + s +"\n");
