@@ -725,19 +725,20 @@ public class UsbongHTTPConnect {
 							//added by Mike, 20200310
 							transactionInJSONFormat.put("treatmentType", inputColumns[INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN]);
 							
-							//added by Mike, 20200313
-							transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN]));
+						} //added by Mike, 20200319
 
-							//added by Mike, 20200319
-							if (autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]).toUpperCase().contains("NEW")) {
-								transactionInJSONFormat.put("transactionOldNew", 1);					
-							}
-							else {
-								transactionInJSONFormat.put("transactionOldNew", 0);					
-							}
+						//added by Mike, 20200313
+						transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN]));
+
+						//added by Mike, 20200319
+						if (autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]).toUpperCase().contains("NEW")) {
+							transactionInJSONFormat.put("transactionOldNew", 1);					
+						}
+						else {
+							transactionInJSONFormat.put("transactionOldNew", 0);					
+						}
 /*							transactionInJSONFormat.put("transactionOldNew", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]));					
 */
-						}
 /*					}
 					else { //hmo name
 						transactionInJSONFormat.put(""+INPUT_TRANSACTION_HMO_NAME_COLUMN, autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_HMO_NAME_COLUMN]));
@@ -980,15 +981,22 @@ System.out.println("downloaded string: " + s +"\n");
 						else {
 							writer.write("Old");							
 						}
+
+						writer.write("\t");							
+
+						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString("treatmentType"));
+
 /*							transactionInJSONFormat.put("transactionOldNew", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]));					
 */
 
-						
+/*						
 						//TO-DO: -add: actual column values
 						//add tabs
 						for (int iTabCount=INPUT_TRANSACTION_OLD_NEW_COLUMN; iTabCount<INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN; iTabCount++) {
 							writer.write("\t");							
 						}
+*/						
+						
 /*						
 						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN));
 */
