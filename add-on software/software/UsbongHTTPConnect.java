@@ -123,11 +123,13 @@ public class UsbongHTTPConnect {
 	private static final int INPUT_TRANSACTION_FEE_COLUMN = 17; //column R
 	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN = 18; //column S
 	private static final int INPUT_TRANSACTION_HMO_NAME_COLUMN = 18; //column S
+	private static final int INPUT_TRANSACTION_OLD_NEW_COLUMN = 12; //column M //added by Mike, 20200319
 	private static final int INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN = 13; //column N //added by Mike, 20200310
 	private static final int INPUT_TRANSACTION_DIAGNOSIS_COLUMN = 14; //column O //added by Mike, 20200313
 	
 	private static final int INPUT_TRANSACTION_FEE_COLUMN_IN_PT = 18; //column S
 	private static final int INPUT_TRANSACTION_FEE_DISCOUNT_COLUMN_IN_PT = 17; //column Q
+	private static final int INPUT_TRANSACTION_OLD_NEW_COLUMN_IN_PT = 10; //column K //added by Mike, 20200319
 	private static final int INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN_IN_PT = 11; //column L //added by Mike, 20200310
 	private static final int INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT = 12; //column M //added by Mike, 20200313
 
@@ -660,7 +662,10 @@ public class UsbongHTTPConnect {
 					transactionInJSONFormat.put("treatmentType", "IN-PT");
 
 					//added by Mike, 20200313
-					transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT]));										
+					transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN_IN_PT]));
+
+					//added by Mike, 20200319
+					transactionInJSONFormat.put("transactionOldNew", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN_IN_PT]));					
 				}
 				else {
 					//edited by Mike, 20200309
@@ -723,6 +728,15 @@ public class UsbongHTTPConnect {
 							//added by Mike, 20200313
 							transactionInJSONFormat.put("treatmentDiagnosis", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_DIAGNOSIS_COLUMN]));
 
+							//added by Mike, 20200319
+							if (autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]).toUpperCase().contains("NEW")) {
+								transactionInJSONFormat.put("transactionOldNew", 1);					
+							}
+							else {
+								transactionInJSONFormat.put("transactionOldNew", 0);					
+							}
+/*							transactionInJSONFormat.put("transactionOldNew", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]));					
+*/
 						}
 /*					}
 					else { //hmo name
@@ -935,6 +949,14 @@ System.out.println("downloaded string: " + s +"\n");
 				System.out.println("totalTransactionCount: "+iTotalTransactionCount);
 				System.out.println("report_filename: "+reportInJSONFormat.getString("report_filename"));
 
+				String sReportFilename = reportInJSONFormat.getString("report_filename");
+
+				//TO-DO: -update: this
+				int inPTColumWithOffset = INPUT_TRANSACTION_OLD_NEW_COLUMN;				
+				if (sReportFilename.contains("IN-PT")) {
+					inPTColumWithOffset = INPUT_TRANSACTION_OLD_NEW_COLUMN-2;
+				}
+
 				for(int iCount=0; iCount<iTotalTransactionCount; iCount++) {
 					if (!reportInJSONFormat.isNull("i"+iCount)) {
 //						reportInJSONFormat.getJSONObject("i"+iCount).toString()
@@ -945,10 +967,26 @@ System.out.println("downloaded string: " + s +"\n");
 
 						//TO-DO: -add: process IN-PT transactions
 						writer.write(reportInJSONFormat.getJSONObject("i"+iCount).getString(""+INPUT_TRANSACTION_PATIENT_NAME_COLUMN)); //1, patient name
+
+						//add tabs
+						for (int iTabCount=INPUT_TRANSACTION_PATIENT_NAME_COLUMN; iTabCount<inPTColumWithOffset; iTabCount++) {
+							writer.write("\t");
+						}
+
+						//added by Mike, 20200319
+						if (reportInJSONFormat.getJSONObject("i"+iCount).getInt("transactionOldNew")==1) {
+							writer.write("New");
+						}
+						else {
+							writer.write("Old");							
+						}
+/*							transactionInJSONFormat.put("transactionOldNew", autoEscapeToJSONFormat(inputColumns[INPUT_TRANSACTION_OLD_NEW_COLUMN]));					
+*/
+
 						
 						//TO-DO: -add: actual column values
 						//add tabs
-						for (int iTabCount=INPUT_TRANSACTION_PATIENT_NAME_COLUMN; iTabCount<INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN; iTabCount++) {
+						for (int iTabCount=INPUT_TRANSACTION_OLD_NEW_COLUMN; iTabCount<INPUT_TRANSACTION_TREATMENT_TYPE_COLUMN; iTabCount++) {
 							writer.write("\t");							
 						}
 /*						
